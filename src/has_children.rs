@@ -27,6 +27,29 @@ WithDescendants: HasChildren<'a,AtomicPathType,Descendant> {
         { self.get_child(atom.atom()) }
 }
 
+// Implement get_descendant for a switcher
+impl <'a,WithDescendants,Joiner,Descendant> 
+HasDescendants<'a,(),(),PathSwitcher,Joiner,Descendant>
+for WithDescendants where
+Descendant: 'a,
+WithDescendants: HasChildren<'a,(),Descendant> {
+    fn get_descendant(&'a self, _: &PathSwitcher) -> Result<&'a Descendant,()> {
+        self.get_child(&())
+    }
+}
+
+// Implement get_descendant for a wrapper
+impl <'a,LeftPathType,RightPathType,P,WithDescendants,Joiner,Descendant> 
+HasDescendants<'a,PathImpl<LeftPathType,RightPathType>,(),PathWrapper<LeftPathType,RightPathType,P>,Joiner,Descendant>
+for WithDescendants where
+P: Path<LeftPathType,RightPathType>,
+Descendant: 'a,
+WithDescendants: HasDescendants<'a,LeftPathType,RightPathType,P,Joiner,Descendant> {
+    fn get_descendant(&'a self, path: &PathWrapper<LeftPathType,RightPathType,P>) -> Result<&'a Descendant,()> {
+        self.get_descendant(path.get_inner())
+    }
+}
+
 // Implement get_descendant for a series
 impl <'a,SubpathType,Subpath,Type>
 HasDescendants<'a,SubpathType,(),PathSeries<SubpathType,Subpath>,(),Type>
@@ -53,28 +76,5 @@ WithDescendants: HasDescendants<'a,LeftPathType,(),LeftPath,(),Joiner> {
     fn get_descendant(&'a self, path: &PathJoiner<LeftPathType,LeftPath,RightPathType,RightPath>) -> Result<&'a Descendant,()> {
         let joiner = self.get_descendant(path.left())?;
         joiner.get_descendant(path.right())
-    }
-}
-
-// Implement get_descendant for a wrapper
-impl <'a,LeftPathType,RightPathType,P,WithDescendants,Joiner,Descendant> 
-HasDescendants<'a,PathImpl<LeftPathType,RightPathType>,(),PathWrapper<LeftPathType,RightPathType,P>,Joiner,Descendant>
-for WithDescendants where
-P: Path<LeftPathType,RightPathType>,
-Descendant: 'a,
-WithDescendants: HasDescendants<'a,LeftPathType,RightPathType,P,Joiner,Descendant> {
-    fn get_descendant(&'a self, path: &PathWrapper<LeftPathType,RightPathType,P>) -> Result<&'a Descendant,()> {
-        self.get_descendant(path.get_inner())
-    }
-}
-
-// Implement get_descendant for a switcher
-impl <'a,WithDescendants,Joiner,Descendant> 
-HasDescendants<'a,(),(),PathSwitcher,Joiner,Descendant>
-for WithDescendants where
-Descendant: 'a,
-WithDescendants: HasChildren<'a,(),Descendant> {
-    fn get_descendant(&'a self, _: &PathSwitcher) -> Result<&'a Descendant,()> {
-        self.get_child(&())
     }
 }

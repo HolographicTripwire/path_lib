@@ -1,24 +1,19 @@
 use std::marker::PhantomData;
 
-use crate::paths::{inner::PathInner, Path, PathAtom, PathImpl, PathLeft, PathRight};
+use crate::paths::{Path, PathImpl};
 
-pub struct PathSeries<SA,SL,SR,S>(Vec<S>,PhantomData<(SA,SL,SR)>) where
-S: Path<SA,SL,SR>;
+pub struct PathSeries<L,P:Path<L,()>>(Vec<P>,PhantomData<L>) where
+P:Path<L,()>;
 
-impl <SA,SL,SR,S> PathSeries<SA,SL,SR,S> where
-S: Path<SA,SL,SR> {
-    fn paths(&self) -> &Vec<S> { &self.0 }
+impl <L,P> PathSeries<L,P> where 
+P: Path<L,()> {
+    pub fn new(series: Vec<P>) -> Self { Self(series, PhantomData) }
+    pub fn paths(&self) -> &Vec<P> { &self.0 }
 }
 
-impl <A,LA,LL,LR,L,R> Path<A,L,R> for
-PathSeries<LA,LL,LR,L> where
-L: Path<LA,LL,LR>, LA: PathAtom<LL,LR,L>, LL: PathLeft<LA,LR,L>, LR: PathRight<LA,LL,L> {}
+impl <L,P> Into<PathImpl<L,()>> for PathSeries<L,P> where
+P: Path<L,()>
+    { fn into(self) -> PathImpl<L,()> { PathImpl::series(self.0.into_iter().map(|x| x.into()).collect()) } }
 
-impl <A,LA,LL,LR,L,RA,RL,RR,R> PathInner<A,LA,LL,LR,L,RA,RL,RR,R> for
-PathSeries<LA,LL,LR,L> where
-L: Path<LA,LL,LR>, LA: PathAtom<LL,LR,L>, LL: PathLeft<LA,LR,L>, LR: PathRight<LA,LL,L>,
-R: Path<RA,RL,RR>, RA: PathAtom<RL,RR,R>, RL: PathLeft<RA,RR,R>, RR: PathRight<RA,RL,R> {
-    fn as_impl<'a,>(&'a self) -> PathImpl<'a,A,LA,LL,LR,L,RA,RL,RR,R> {
-        super::PathImpl::Atomic(self)
-    }
-}
+impl <L,P> Path<L,()> for PathSeries<L,P> where
+P: Path<L,()> {}

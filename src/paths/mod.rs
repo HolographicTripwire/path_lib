@@ -1,21 +1,29 @@
 //mod inner;
 mod atomic;
+mod switcher;
+mod wrapper;
 mod series;
 mod joiner;
-mod wrapper;
 
 pub use atomic::*;
+pub use switcher::*;
+pub use wrapper::*;
 pub use series::*;
 pub use joiner::*;
-pub use wrapper::*;
 
 pub trait PathPrimitive {}
+impl PathPrimitive for () {}
 
 pub enum PathImpl<L,R> {
+    Switcher,
     Wrapper(L),
     Series(Vec<PathImpl<L,()>>),
     Joiner(Box<PathImpl<L,()>>,Box<PathImpl<R,()>>)
 }
+impl PathImpl<(),()> {
+    fn switcher() -> Self { Self::Switcher }
+}
+
 impl <L: PathPrimitive> PathImpl<L,()> {
     fn atom(atom: L) -> Self { Self::Wrapper(atom) }
 }

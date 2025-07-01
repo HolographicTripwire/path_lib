@@ -1,33 +1,35 @@
-mod inner;
+//mod inner;
 mod atomic;
 mod series;
 mod joiner;
+mod wrapper;
 
 pub use atomic::*;
 pub use series::*;
 pub use joiner::*;
+pub use wrapper::*;
 
+pub trait PathPrimitive {}
 
-// Define PathImpl
-pub enum PathImpl<'a,A,LA,LL,LR,L,RA,RL,RR,R> where
-L: Path<LA,LL,LR>, LA: PathAtom<LL,LR,L>, LL: PathLeft<LA,LR,L>, LR: PathRight<LA,LL,L>,
-R: Path<RA,RL,RR>, RA: PathAtom<RL,RR,R>, RL: PathLeft<RA,RR,R>, RR: PathRight<RA,RL,R> {
-    Atomic(&'a AtomicPath<A>),
-    Series(&'a PathSeries<LA,LL,LR,L>),
-    Joiner(&'a PathJoiner<LA,LL,LR,L,RA,RL,RR,R>)
+pub enum PathImpl<L,R> {
+    Wrapper(L),
+    Series(Vec<PathImpl<L,()>>),
+    Joiner(Box<PathImpl<L,()>>,Box<PathImpl<R,()>>)
+}
+impl <L: PathPrimitive> PathImpl<L,()> {
+    fn atom(atom: L) -> Self { Self::Wrapper(atom) }
+}
+impl <L,R> PathImpl<PathImpl<L,R>,()> {
+    fn wrapper(wrapped: PathImpl<L,R>) -> Self
+        { Self::Wrapper(wrapped) }
+}
+impl <L> PathImpl<L,()> {
+    fn series(series: Vec<PathImpl<L,()>>) -> Self
+        { PathImpl::Series(series) }
+}
+impl <L,R> PathImpl<L,R> {
+    fn joiner(left: PathImpl<L,()>, right: PathImpl<R,()>) -> Self
+        { Self::Joiner(Box::new(left), Box::new(right)) }
 }
 
-// Define Path
-pub trait Path<A,L,R> {}
-
-// Define PathAtom
-trait PathAtom<L,R,P: Path<Self,L,R>>: Sized {}
-impl <A:Sized,L,R,P:Path<A,L,R>> PathAtom<L,R,P> for A {}
-
-// Define PathLeft
-trait PathLeft<A,R,P: Path<A,Self,R>>: Sized {}
-impl <A,L:Sized,R,P:Path<A,L,R>> PathLeft<A,R,P> for L {}
-
-// Define PathRight
-trait PathRight<A,L,P: Path<A,L,Self>>: Sized {}
-impl <A,L,R:Sized,P:Path<A,L,R>> PathRight<A,L,P> for R {}
+pub trait Path<L,R>: Into<PathImpl<L,R>> {}

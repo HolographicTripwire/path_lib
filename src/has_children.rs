@@ -28,16 +28,14 @@ WithDescendants: HasChildren<'a,AtomicPathType,Descendant> {
 }
 
 // Implement get_descendant for a series
-impl <'a,SubpathType,Subpath,WithDescendants,Descendant>
-HasDescendants<'a,SubpathType,(),PathSeries<SubpathType,Subpath>,(),Descendant>
-for WithDescendants where
+impl <'a,SubpathType,Subpath,Type>
+HasDescendants<'a,SubpathType,(),PathSeries<SubpathType,Subpath>,(),Type>
+for Type where
 Subpath: Path<SubpathType,()>,
-Descendant: 'a + HasDescendants<'a,SubpathType,(),Subpath,(),Descendant>,
-WithDescendants: HasDescendants<'a,SubpathType,(),Subpath,(),Descendant> {
-    fn get_descendant(&'a self, path: &PathSeries<SubpathType,Subpath>) -> Result<&'a Descendant,()> {
-        let (head, tail) = path.paths().split_first().unwrap();
-        let mut result = self.get_descendant(head)?;
-        for subpath in tail
+Type: 'a + HasDescendants<'a,SubpathType,(),Subpath,(),Type> {
+    fn get_descendant(&'a self, path: &PathSeries<SubpathType,Subpath>) -> Result<&'a Type,()> {
+        let mut result = self;
+        for subpath in path.paths()
             { result = result.get_descendant(subpath)?; }
         Ok(result)
     }

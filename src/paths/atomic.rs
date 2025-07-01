@@ -9,4 +9,5 @@ impl <Atom: PathPrimitive> AtomicPath<Atom> {
 
 impl <A: PathPrimitive> Into<PathImpl<A,()>> for AtomicPath<A>
     { fn into(self) -> PathImpl<A,()> { PathImpl::atom(self.0) } }
+
 impl <A: PathPrimitive> Path<A,()> for AtomicPath<A> {}

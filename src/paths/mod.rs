@@ -3,13 +3,13 @@ mod atomic;
 mod switcher;
 mod wrapper;
 mod series;
-mod joiner;
+mod pair;
 
 pub use atomic::*;
 pub use switcher::*;
 pub use wrapper::*;
 pub use series::*;
-pub use joiner::*;
+pub use pair::*;
 
 pub trait PathPrimitive {}
 impl PathPrimitive for () {}
@@ -18,8 +18,10 @@ pub enum PathImpl<L,R> {
     Switcher,
     Wrapper(L),
     Series(Vec<PathImpl<L,()>>),
-    Joiner(Box<PathImpl<L,()>>,Box<PathImpl<R,()>>)
+    Pair(Box<PathImpl<L,()>>,Box<PathImpl<R,()>>)
 }
+impl <L,R> Path<L,R> for PathImpl<L,R> {}
+
 impl PathImpl<(),()> {
     fn switcher() -> Self { Self::Switcher }
 }
@@ -36,8 +38,8 @@ impl <L> PathImpl<L,()> {
         { PathImpl::Series(series) }
 }
 impl <L,R> PathImpl<L,R> {
-    fn joiner(left: PathImpl<L,()>, right: PathImpl<R,()>) -> Self
-        { Self::Joiner(Box::new(left), Box::new(right)) }
+    fn pair(left: PathImpl<L,()>, right: PathImpl<R,()>) -> Self
+        { Self::Pair(Box::new(left), Box::new(right)) }
 }
 
 pub trait Path<L,R>: Into<PathImpl<L,R>> {}

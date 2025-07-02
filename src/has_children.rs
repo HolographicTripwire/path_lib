@@ -1,5 +1,5 @@
 
-use crate::{paths::{AtomicPath, Path, PathJoiner, PathPrimitive, PathSeries, PathSwitcher, PathWrapper}, PathImpl};
+use crate::{paths::{AtomicPath, Path, PathPair, PathPrimitive, PathSeries, PathSwitcher, PathWrapper}, PathImpl};
 
 // Define HasChildren
 pub trait HasChildren<'a, AtomicPathType, Child>: 'a + Sized where
@@ -66,14 +66,14 @@ Type: 'a + HasDescendants<'a,SubpathType,(),Subpath,(),Type> {
 
 // Implement get_descendant for a joiner
 impl <'a,LeftPathType,LeftPath,RightPathType,RightPath,WithDescendants,Joiner,Descendant> 
-HasDescendants<'a,LeftPathType,RightPathType,PathJoiner<LeftPathType,LeftPath,RightPathType,RightPath>,Joiner,Descendant>
+HasDescendants<'a,LeftPathType,RightPathType,PathPair<LeftPathType,LeftPath,RightPathType,RightPath>,Joiner,Descendant>
 for WithDescendants where
 LeftPath: Path<LeftPathType,()>,
 RightPath: Path<RightPathType,()>,
 Descendant: 'a,
 Joiner: 'a + HasDescendants<'a,RightPathType,(),RightPath,(),Descendant>,
 WithDescendants: HasDescendants<'a,LeftPathType,(),LeftPath,(),Joiner> {
-    fn get_descendant(&'a self, path: &PathJoiner<LeftPathType,LeftPath,RightPathType,RightPath>) -> Result<&'a Descendant,()> {
+    fn get_descendant(&'a self, path: &PathPair<LeftPathType,LeftPath,RightPathType,RightPath>) -> Result<&'a Descendant,()> {
         let joiner = self.get_descendant(path.left())?;
         joiner.get_descendant(path.right())
     }

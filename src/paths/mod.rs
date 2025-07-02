@@ -44,3 +44,12 @@ impl <L: Clone,R: Clone> PathImpl<L,R> {
 }
 
 pub trait Path<L: Clone,R: Clone>: Clone + Into<PathImpl<L,R>> {}
+
+pub trait JoinablePath<LL,LR,RL,RR,P>: Path<LL,LR> where 
+LL: Clone, LR: Clone, RL: Clone, RR: Clone, P: Path<RL,RR> {
+    type OL: Clone;
+    type OR: Clone;
+    type Output: Path<Self::OL,Self::OR>;
+
+    fn join(self, path: P) -> Self::Output;
+}

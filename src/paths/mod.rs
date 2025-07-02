@@ -53,3 +53,15 @@ LL: Clone, LR: Clone, RL: Clone, RR: Clone, P: Path<RL,RR> {
 
     fn join(self, path: P) -> Self::Output;
 }
+
+impl <LL,LR,L,RL,RR,R> JoinablePath<LL,LR,RL,RR,R> for L where 
+LL: Clone, LR: Clone, L: Path<LL,LR>,
+RL: Clone, RR: Clone, R: Path<RL,RR> {
+    type OL = PathImpl<LL, LR>;
+    type OR = PathImpl<RL, RR>;
+    type Output = PathPair<PathImpl<LL, LR>, PathWrapper<LL, LR, L>, PathImpl<RL, RR>, PathWrapper<RL, RR, R>>;
+
+    fn join(self, other: R) -> PathPair<PathImpl<LL, LR>, PathWrapper<LL, LR, L>, PathImpl<RL, RR>, PathWrapper<RL, RR, R>> {
+        PathPair::new(PathWrapper::new(self), PathWrapper::new(other))
+    }
+}

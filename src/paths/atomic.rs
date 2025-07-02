@@ -1,5 +1,6 @@
 use crate::paths::{Path, PathImpl, PathPrimitive};
 
+#[derive(Clone)]
 pub struct AtomicPath<Atom: PathPrimitive>(Atom);
 
 impl <Atom: PathPrimitive> AtomicPath<Atom> {

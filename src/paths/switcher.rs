@@ -1,9 +1,10 @@
 use crate::paths::{Path, PathImpl};
 
-pub struct PathSwitcher();
+#[derive(Clone)]
+pub struct PathSwitcher;
 
 impl PathSwitcher {
-    pub fn new() -> Self { Self() }
+    pub fn new() -> Self { Self }
 }
 
 impl Into<PathImpl<(),()>> for PathSwitcher

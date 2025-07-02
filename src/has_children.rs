@@ -12,7 +12,7 @@ Child: 'a {
 // Define HasDescendants
 pub trait HasDescendants<'a,L,R,P,Joiner,Descendant> where
 Descendant: 'a,
-P: Path<L,R> {
+L: Clone, R: Clone, P: Path<L,R> {
     fn get_descendant(&'a self, path: &P) -> Result<&'a Descendant,()>;
 }
 
@@ -42,7 +42,7 @@ WithDescendants: HasChildren<'a,(),Descendant> {
 impl <'a,LeftPathType,RightPathType,P,WithDescendants,Joiner,Descendant> 
 HasDescendants<'a,PathImpl<LeftPathType,RightPathType>,(),PathWrapper<LeftPathType,RightPathType,P>,Joiner,Descendant>
 for WithDescendants where
-P: Path<LeftPathType,RightPathType>,
+LeftPathType: Clone, RightPathType: Clone, P: Path<LeftPathType,RightPathType>,
 Descendant: 'a,
 WithDescendants: HasDescendants<'a,LeftPathType,RightPathType,P,Joiner,Descendant> {
     fn get_descendant(&'a self, path: &PathWrapper<LeftPathType,RightPathType,P>) -> Result<&'a Descendant,()> {
@@ -54,7 +54,7 @@ WithDescendants: HasDescendants<'a,LeftPathType,RightPathType,P,Joiner,Descendan
 impl <'a,SubpathType,Subpath,Type>
 HasDescendants<'a,SubpathType,(),PathSeries<SubpathType,Subpath>,(),Type>
 for Type where
-Subpath: Path<SubpathType,()>,
+SubpathType: Clone, Subpath: Path<SubpathType,()>,
 Type: 'a + HasDescendants<'a,SubpathType,(),Subpath,(),Type> {
     fn get_descendant(&'a self, path: &PathSeries<SubpathType,Subpath>) -> Result<&'a Type,()> {
         let mut result = self;
@@ -68,8 +68,8 @@ Type: 'a + HasDescendants<'a,SubpathType,(),Subpath,(),Type> {
 impl <'a,LeftPathType,LeftPath,RightPathType,RightPath,WithDescendants,Joiner,Descendant> 
 HasDescendants<'a,LeftPathType,RightPathType,PathPair<LeftPathType,LeftPath,RightPathType,RightPath>,Joiner,Descendant>
 for WithDescendants where
-LeftPath: Path<LeftPathType,()>,
-RightPath: Path<RightPathType,()>,
+LeftPathType: Clone, LeftPath: Path<LeftPathType,()>,
+RightPathType: Clone, RightPath: Path<RightPathType,()>,
 Descendant: 'a,
 Joiner: 'a + HasDescendants<'a,RightPathType,(),RightPath,(),Descendant>,
 WithDescendants: HasDescendants<'a,LeftPathType,(),LeftPath,(),Joiner> {

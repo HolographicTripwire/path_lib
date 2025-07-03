@@ -15,6 +15,12 @@ RL: Clone, R: Path<RL,()> {
     pub fn right(&self) -> &R { &self.1 }
 }
 
+impl <LL,L,RL,R> From<(L,R)> for PathPair<LL,L,RL,R> where
+LL: Clone, L: Path<LL,()>, 
+RL: Clone, R: Path<RL,()> {
+    fn from(value: (L,R)) -> Self { Self::new(value.0,value.1) }
+}
+
 impl <LL,L,RL,R> Into<PathImpl<LL,RL>> for PathPair<LL,L,RL,R> where
 LL: Clone, L: Path<LL,()>, 
 RL: Clone, R: Path<RL,()> { 

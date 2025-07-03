@@ -8,8 +8,8 @@ impl <L:Path, R:Path> PathPair<L,R> {
     pub fn right(&self) -> &R { &self.1 }
 }
 
-impl <L:Path, R:Path> From<(L,R)> for PathPair<L,R> {
-    fn from(value: (L,R)) -> Self { Self::new(value.0,value.1) }
+impl <L:Path, IL:Into<L>, R:Path, IR:Into<R>> From<(IL,IR)> for PathPair<L,R> {
+    fn from(value: (IL,IR)) -> Self { Self::new(value.0.into(),value.1.into()) }
 }
 
 impl <L:Path, R:Path> Path for PathPair<L,R> {}

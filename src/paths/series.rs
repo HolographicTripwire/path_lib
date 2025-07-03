@@ -8,8 +8,8 @@ impl <P:Path> PathSeries<P> where {
     pub fn into_paths(self) -> Vec<P> { self.0 }
 }
 
-impl <P:Path> From<Vec<P>> for PathSeries<P> {
-    fn from(value: Vec<P>) -> Self { Self::new(value) }
+impl <P:Path, IP:Into<P>, It: IntoIterator<Item=IP>> From<It> for PathSeries<P> {
+    fn from(value: It) -> Self { Self::new(value.into_iter().map(|v| v.into()).collect()) }
 }
 
 impl <P:Path> Path for PathSeries<P> {}

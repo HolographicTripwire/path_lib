@@ -1,4 +1,4 @@
-use crate::paths::{Path, PathImpl, PathPrimitive};
+use crate::paths::{Path, PathPrimitive};
 
 #[derive(Clone)]
 pub struct AtomicPath<Atom: PathPrimitive>(Atom);
@@ -12,7 +12,4 @@ impl <Atom: PathPrimitive> From<Atom> for AtomicPath<Atom> {
     fn from(value: Atom) -> Self { Self::new(value) }
 }
 
-impl <A: PathPrimitive> Into<PathImpl<A,()>> for AtomicPath<A>
-    { fn into(self) -> PathImpl<A,()> { PathImpl::atom(self.0) } }
-
-impl <A: PathPrimitive> Path<A,()> for AtomicPath<A> {}
+impl <A: PathPrimitive> Path for AtomicPath<A> {}

@@ -1,5 +1,5 @@
 
-use crate::{paths::{AtomicPath, Path, PathPair, PathPrimitive, PathSeries, PathSwitcher, PathWrapper}, PathImpl};
+use crate::paths::{AtomicPath, Path, PathPair, PathPrimitive, PathSeries, PathSwitcher};
 
 // Define HasChildren
 pub trait HasChildren<'a, AtomicPathType, Child>: 'a + Sized where
@@ -10,15 +10,14 @@ Child: 'a {
 }
 
 // Define HasDescendants
-pub trait HasDescendants<'a,L,R,P,Joiner,Descendant> where
-Descendant: 'a,
-L: Clone, R: Clone, P: Path<L,R> {
-    fn get_descendant(&'a self, path: &P) -> Result<&'a Descendant,()>;
+pub trait HasDescendants<'a,DescendantPath,Joiner,Descendant> where
+Descendant: 'a, DescendantPath:Path {
+    fn get_descendant(&'a self, path: &DescendantPath) -> Result<&'a Descendant,()>;
 }
 
 // Implement get_descendant for an atomic
 impl <'a,AtomicPathType,WithDescendants,Descendant> 
-HasDescendants<'a,AtomicPathType,(),AtomicPath<AtomicPathType>,(),Descendant>
+HasDescendants<'a,AtomicPath<AtomicPathType>,(),Descendant>
 for WithDescendants where
 Descendant: 'a,
 AtomicPathType: PathPrimitive,
@@ -29,7 +28,7 @@ WithDescendants: HasChildren<'a,AtomicPathType,Descendant> {
 
 // Implement get_descendant for a switcher
 impl <'a,WithDescendants,Joiner,Descendant> 
-HasDescendants<'a,(),(),PathSwitcher,Joiner,Descendant>
+HasDescendants<'a,PathSwitcher,Joiner,Descendant>
 for WithDescendants where
 Descendant: 'a,
 WithDescendants: HasChildren<'a,(),Descendant> {
@@ -38,25 +37,13 @@ WithDescendants: HasChildren<'a,(),Descendant> {
     }
 }
 
-// Implement get_descendant for a wrapper
-impl <'a,LeftPathType,RightPathType,P,WithDescendants,Joiner,Descendant> 
-HasDescendants<'a,PathImpl<LeftPathType,RightPathType>,(),PathWrapper<LeftPathType,RightPathType,P>,Joiner,Descendant>
-for WithDescendants where
-LeftPathType: Clone, RightPathType: Clone, P: Path<LeftPathType,RightPathType>,
-Descendant: 'a,
-WithDescendants: HasDescendants<'a,LeftPathType,RightPathType,P,Joiner,Descendant> {
-    fn get_descendant(&'a self, path: &PathWrapper<LeftPathType,RightPathType,P>) -> Result<&'a Descendant,()> {
-        self.get_descendant(path.get_inner())
-    }
-}
-
 // Implement get_descendant for a series
-impl <'a,SubpathType,Subpath,Type>
-HasDescendants<'a,SubpathType,(),PathSeries<SubpathType,Subpath>,(),Type>
+impl <'a,Subpath,Type>
+HasDescendants<'a,PathSeries<Subpath>,(),Type>
 for Type where
-SubpathType: Clone, Subpath: Path<SubpathType,()>,
-Type: 'a + HasDescendants<'a,SubpathType,(),Subpath,(),Type> {
-    fn get_descendant(&'a self, path: &PathSeries<SubpathType,Subpath>) -> Result<&'a Type,()> {
+Subpath: Path,
+Type: 'a + HasDescendants<'a,Subpath,(),Type> {
+    fn get_descendant(&'a self, path: &PathSeries<Subpath>) -> Result<&'a Type,()> {
         let mut result = self;
         for subpath in path.paths()
             { result = result.get_descendant(subpath)?; }
@@ -65,15 +52,14 @@ Type: 'a + HasDescendants<'a,SubpathType,(),Subpath,(),Type> {
 }
 
 // Implement get_descendant for a joiner
-impl <'a,LeftPathType,LeftPath,RightPathType,RightPath,WithDescendants,Joiner,Descendant> 
-HasDescendants<'a,LeftPathType,RightPathType,PathPair<LeftPathType,LeftPath,RightPathType,RightPath>,Joiner,Descendant>
+impl <'a,LeftPath,RightPath,WithDescendants,Joiner,Descendant> 
+HasDescendants<'a,PathPair<LeftPath,RightPath>,Joiner,Descendant>
 for WithDescendants where
-LeftPathType: Clone, LeftPath: Path<LeftPathType,()>,
-RightPathType: Clone, RightPath: Path<RightPathType,()>,
+LeftPath: Path, RightPath: Path,
 Descendant: 'a,
-Joiner: 'a + HasDescendants<'a,RightPathType,(),RightPath,(),Descendant>,
-WithDescendants: HasDescendants<'a,LeftPathType,(),LeftPath,(),Joiner> {
-    fn get_descendant(&'a self, path: &PathPair<LeftPathType,LeftPath,RightPathType,RightPath>) -> Result<&'a Descendant,()> {
+Joiner: 'a + HasDescendants<'a,RightPath,(),Descendant>,
+WithDescendants: HasDescendants<'a,LeftPath,(),Joiner> {
+    fn get_descendant(&'a self, path: &PathPair<LeftPath,RightPath>) -> Result<&'a Descendant,()> {
         let joiner = self.get_descendant(path.left())?;
         joiner.get_descendant(path.right())
     }

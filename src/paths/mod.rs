@@ -1,16 +1,15 @@
 //mod inner;
-mod atomic;
 mod switcher;
 mod series;
 mod pair;
 
-pub use atomic::*;
 pub use switcher::*;
 pub use series::*;
 pub use pair::*;
 
 pub trait PathPrimitive: Clone {}
 impl PathPrimitive for () {}
+impl <P: PathPrimitive> Path for P {}
 
 pub trait Path: Clone {}
 

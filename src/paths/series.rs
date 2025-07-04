@@ -9,7 +9,8 @@ impl <P:Path> PathSeries<P> where {
     
     pub fn prepend(&mut self, item: impl Into<P>) -> &Self { self.0.insert(0,item.into()); self }
     pub fn append(&mut self, item: impl Into<P>) -> &Self { self.0.push(item.into()); self }
-    
+    pub fn pop(&mut self) -> Option<P> { self.0.pop() }
+
     pub fn paths(&self) -> &Vec<P> { &self.0 }
     pub fn into_paths(self) -> Vec<P> { self.0 }
 }

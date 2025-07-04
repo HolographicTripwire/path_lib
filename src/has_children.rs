@@ -2,18 +2,18 @@
 use crate::{paths::{Path, PathPair, PathPrimitive, PathSeries, PathSwitcher}, AtPath};
 
 // Define HasChildren
-pub trait HasChildren<'a, AtomicPathType, Child>: 'a + Sized where
-AtomicPathType: PathPrimitive,
+pub trait HasChildren<'a, Primitive, Child>: 'a + Sized where
+Primitive: PathPrimitive,
 Child: 'a {
     fn children(&'a self) -> impl IntoIterator<Item = &'a Child>;
-    fn get_child(&'a self, path: &AtomicPathType) -> Result<&'a Child,()>;
+    fn get_child(&'a self, path: &Primitive) -> Result<&'a Child,()>;
 }
 
 // Define HasDescendants
-pub trait HasDescendants<'a,DescendantPath,Joiner,Descendant> where
-Descendant: 'a, DescendantPath:Path {
-    fn get_descendant(&'a self, path: &DescendantPath) -> Result<&'a Descendant,()>;
-    fn get_located_descendant(&'a self, path: DescendantPath) -> Result<AtPath<'a,Descendant,DescendantPath>,()>
+pub trait HasDescendants<'a,PathToDescendant,_Joiner,Descendant> where
+Descendant: 'a, PathToDescendant:Path {
+    fn get_descendant(&'a self, path: &PathToDescendant) -> Result<&'a Descendant,()>;
+    fn get_located_descendant(&'a self, path: PathToDescendant) -> Result<AtPath<'a,Descendant,PathToDescendant>,()>
         { Ok(AtPath::from_at(self.get_descendant(&path)?, path)) }
 }
 

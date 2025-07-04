@@ -17,3 +17,7 @@ impl <L:Path, R:Path> Path for PathPair<L,R> {}
 impl <L:Path, R:Path> Clone for PathPair<L,R> {
     fn clone(&self) -> Self { Self(self.0.clone(), self.1.clone()) }
 }
+
+impl <L: Path + PartialEq, R: Path + PartialEq> PartialEq for PathPair<L,R> {
+    fn eq(&self, other: &Self) -> bool { self.0 == other.0 && self.1 == other.1 }
+} impl <L: Path + Eq, R: Path + Eq> Eq for PathPair<L,R> {}

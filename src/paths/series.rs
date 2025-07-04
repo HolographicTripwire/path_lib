@@ -24,3 +24,7 @@ impl <P:Path> Path for PathSeries<P> {}
 impl <P:Path> Clone for PathSeries<P> where {
     fn clone(&self) -> Self { Self(self.0.clone()) }
 }
+
+impl <P: Path + PartialEq> PartialEq for PathSeries<P> {
+    fn eq(&self, other: &Self) -> bool { self.0 == other.0 }
+} impl <P: Path + Eq> Eq for PathSeries<P> {}

@@ -1,6 +1,6 @@
 use crate::paths::{Path};
 
-#[derive(Clone)]
+#[derive(Clone,PartialEq,Eq)]
 pub struct PathSwitcher;
 
 impl PathSwitcher {

@@ -1,5 +1,5 @@
 
-use crate::paths::{Path, PathPair, PathPrimitive, PathSeries, PathSwitcher};
+use crate::{paths::{Path, PathPair, PathPrimitive, PathSeries, PathSwitcher}, AtPath};
 
 // Define HasChildren
 pub trait HasChildren<'a, AtomicPathType, Child>: 'a + Sized where
@@ -13,6 +13,8 @@ Child: 'a {
 pub trait HasDescendants<'a,DescendantPath,Joiner,Descendant> where
 Descendant: 'a, DescendantPath:Path {
     fn get_descendant(&'a self, path: &DescendantPath) -> Result<&'a Descendant,()>;
+    fn get_located_descendant(&'a self, path: DescendantPath) -> Result<AtPath<'a,Descendant,DescendantPath>,()>
+        { Ok(AtPath::from_at(self.get_descendant(&path)?, path)) }
 }
 
 // Implement get_descendant for a Primitive path

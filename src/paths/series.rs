@@ -4,6 +4,8 @@ pub struct PathSeries<P: Path>(Vec<P>);
 
 impl <P:Path> PathSeries<P> where {
     pub fn new(series: Vec<P>) -> Self { Self(series) }
+    pub fn prepend(mut self, item: impl Into<P>) -> Self { self.0.insert(0,item.into()); self }
+    pub fn append(mut self, item: impl Into<P>) -> Self { self.0.push(item.into()); self }
     pub fn paths(&self) -> &Vec<P> { &self.0 }
     pub fn into_paths(self) -> Vec<P> { self.0 }
 }

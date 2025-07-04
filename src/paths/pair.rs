@@ -21,3 +21,9 @@ impl <L:Path, R:Path> Clone for PathPair<L,R> {
 impl <L: Path + PartialEq, R: Path + PartialEq> PartialEq for PathPair<L,R> {
     fn eq(&self, other: &Self) -> bool { self.0 == other.0 && self.1 == other.1 }
 } impl <L: Path + Eq, R: Path + Eq> Eq for PathPair<L,R> {}
+
+impl <L: Path + std::fmt::Debug, R: Path + std::fmt::Debug> std::fmt::Debug for PathPair<L,R> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_tuple("PathPair").field(&self.0).field(&self.1).finish()
+    }
+}

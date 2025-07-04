@@ -28,3 +28,9 @@ impl <P:Path> Clone for PathSeries<P> where {
 impl <P: Path + PartialEq> PartialEq for PathSeries<P> {
     fn eq(&self, other: &Self) -> bool { self.0 == other.0 }
 } impl <P: Path + Eq> Eq for PathSeries<P> {}
+
+impl <P: Path + std::fmt::Debug> std::fmt::Debug for PathSeries<P> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_tuple("PathSeries").field(&self.0).finish()
+    }
+}

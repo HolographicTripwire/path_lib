@@ -3,7 +3,7 @@ use crate::paths::{Path};
 pub struct PathSeries<P: Path>(Vec<P>);
 
 impl <P:Path> PathSeries<P> where {
-    pub fn new(series: Vec<P>) -> Self { Self(series) }
+    pub fn new(series: impl IntoIterator<Item=P>) -> Self { Self(series.into_iter().collect()) }
     pub fn prepend(mut self, item: impl Into<P>) -> Self { self.0.insert(0,item.into()); self }
     pub fn append(mut self, item: impl Into<P>) -> Self { self.0.push(item.into()); self }
     pub fn paths(&self) -> &Vec<P> { &self.0 }
@@ -11,7 +11,7 @@ impl <P:Path> PathSeries<P> where {
 }
 
 impl <P:Path, IP:Into<P>, It: IntoIterator<Item=IP>> From<It> for PathSeries<P> {
-    fn from(value: It) -> Self { Self::new(value.into_iter().map(|v| v.into()).collect()) }
+    fn from(value: It) -> Self { Self::new(value.into_iter().map(|v| v.into())) }
 }
 
 impl <P:Path> Path for PathSeries<P> {}

@@ -2,7 +2,7 @@ mod joinable;
 
 use crate::{has_children::HasDescendants, paths::{Path}};
 
-pub use joinable::ObjAtJoinablePath;
+pub use joinable::ObjAtAppendablePath;
 
 pub struct ObjAtPath<'a, Obj, AtPath:Path> {
     obj: &'a Obj,

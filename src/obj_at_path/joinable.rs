@@ -1,9 +1,9 @@
-use crate::{obj_at_path::ObjAtPath, paths::JoinablePath, HasDescendants, Path};
+use crate::{obj_at_path::ObjAtPath, paths::AppendablePath, HasDescendants, Path};
 
-pub trait ObjAtJoinablePath<'a,J,
+pub trait ObjAtAppendablePath<'a,J,
 OldObj: 'a + HasDescendants<'a,PathJoiner,J,NewObj>,
 NewObj: 'a,
-OldAtPath: 'a + JoinablePath<PathJoiner,Output=NewAtPath>,
+OldAtPath: 'a + AppendablePath<PathJoiner,Output=NewAtPath>,
 PathJoiner: Path,
 NewAtPath: 'a + Path> {
     fn _obj(&'a self) -> &'a OldObj;
@@ -11,7 +11,7 @@ NewAtPath: 'a + Path> {
 
     fn join(&'a self, subpath: PathJoiner) -> Result<ObjAtPath<'a,NewObj,NewAtPath>,()> {
         let obj = self._obj().get_descendant(&subpath)?;
-        let path = self._path().clone().join(subpath);
+        let path = self._path().clone().append(subpath);
         Ok(ObjAtPath::from_at(obj,path))
     }
 }
@@ -19,10 +19,10 @@ NewAtPath: 'a + Path> {
 impl <'a,J,
 OldObj: 'a + HasDescendants<'a,PathJoiner,J,NewObj>,
 NewObj: 'a,
-OldAtPath: 'a + JoinablePath<PathJoiner,Output=NewAtPath>,
+OldAtPath: 'a + AppendablePath<PathJoiner,Output=NewAtPath>,
 PathJoiner: Path,
 NewAtPath: 'a + Path>
-ObjAtJoinablePath<'a,J,OldObj,NewObj,OldAtPath,PathJoiner,NewAtPath> for
+ObjAtAppendablePath<'a,J,OldObj,NewObj,OldAtPath,PathJoiner,NewAtPath> for
 ObjAtPath<'a,OldObj,OldAtPath> {
     fn _obj(&'a self) -> &'a OldObj { self.obj() }
     fn _path(&'a self) -> &'a OldAtPath { self.path() }

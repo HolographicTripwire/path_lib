@@ -30,18 +30,33 @@ pub trait Path: Clone {}
 /// - [`PathPrimitive`].join([`PathSeries<PathPrimitive>`](PathSeries)) -> [`PathSeries<PathPrimitive>`](PathSeries)
 /// - [`PathSeries<PathPrimitive>`](PathSeries).join([`PathPrimitive`]) -> [`PathSeries<PathPrimitive>`](PathSeries)
 /// - [`PathSeries<PathPrimitive>`](PathSeries).join([`PathSeries<PathPrimitive>`](PathSeries)) -> [`PathSeries<PathPrimitive>`](PathSeries)
-pub trait JoinablePath<P>: Path where P: Path {
+pub trait AppendablePath<P>: Path where P: Path {
     /// The [Path] produced by joining this path to `P`
     type Output: Path;
 
     /// Join this path with another to produce a path of type [Output](JoinablePath::Output)
-    fn join(self, path: P) -> Self::Output;
+    fn append(self, path: P) -> Self::Output;
 }
 
-impl <L, R> JoinablePath<R> for L where L: Path, R: Path {
+impl <L, R> AppendablePath<R> for L where L: Path, R: Path {
     type Output = PathPair<L, R>;
 
-    fn join(self, other: R) -> PathPair<L,R> {
-        PathPair::new(self, other)
-    }
+    fn append(self, other: R) -> PathPair<L,R>
+        { PathPair::new(self, other) }
+}
+
+/// An inverse version of [AppendablePath]
+pub trait PrependablePath<P>: Path where P: Path {
+    /// The [Path] produced by joining this path to `P`
+    type Output: Path;
+
+    /// Join this path with another to produce a path of type [Output](JoinablePath::Output)
+    fn prepend(self, path: P) -> Self::Output;
+}
+
+impl <L, R, O: Path> PrependablePath<L> for R where 
+L: AppendablePath<R,Output=O>, R: Path  {
+    type Output = O;
+    fn prepend(self, path: L) -> Self::Output
+        { path.append(self) }
 }

@@ -5,8 +5,23 @@ use crate::{paths::{Path, PathPair, PathPrimitive, PathSeries, PathSwitcher}, Ob
 pub trait HasChildren<'a, Primitive, Child>: 'a + Sized where
 Primitive: PathPrimitive,
 Child: 'a {
-    fn children(&'a self) -> impl IntoIterator<Item = &'a Child>;
+    fn valid_primitive_paths(&'a self) -> impl IntoIterator<Item = Primitive>;
     fn get_child(&'a self, path: &Primitive) -> Result<&'a Child,()>;
+
+    fn get_children(&'a self) -> impl IntoIterator<Item = &'a Child> {
+        self.valid_primitive_paths()
+            .into_iter()
+            .map(|path|
+                self.get_child(&path).expect("valid_primitive_paths returned an invalid path")
+            )
+    }
+    fn get_located_children(&'a self) -> impl IntoIterator<Item = ObjAtPath<'a,Child,Primitive>> {
+        self.valid_primitive_paths()
+            .into_iter().map(|path| {
+                let child = self.get_child(&path).expect("valid_primitive_paths returned an invalid path");
+                ObjAtPath::from_at(child,path)
+            })
+    }
 }
 
 // Define HasDescendants

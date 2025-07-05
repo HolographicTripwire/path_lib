@@ -1,5 +1,5 @@
 
-use crate::{paths::{Path, PathPair, PathPrimitive, PathSeries, PathSwitcher}, ObjAtPath};
+use crate::{obj_at_path::ObjAtPath, paths::{Path, PathPair, PathPrimitive, PathSeries, PathSwitcher}};
 
 // Define HasChildren
 pub trait HasChildren<'a, Primitive, Child>: 'a + Sized where

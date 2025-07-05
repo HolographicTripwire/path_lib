@@ -9,7 +9,7 @@ NewAtPath: 'a + Path> {
     fn _obj(&'a self) -> &'a OldObj;
     fn _path(&'a self) -> &'a OldAtPath;
 
-    fn prepend(&'a self, subpath: PathToAppend) -> Result<ObjAtPath<'a,NewObj,NewAtPath>,()> {
+    fn append(&'a self, subpath: PathToAppend) -> Result<ObjAtPath<'a,NewObj,NewAtPath>,()> {
         let obj = self._obj().get_descendant(&subpath)?;
         let path = self._path().clone().append(subpath);
         Ok(ObjAtPath::from_at(obj,path))
@@ -36,7 +36,7 @@ NewAtPath: 'a + Path> {
     fn _obj(&'a self) -> &'a Obj;
     fn _path(&'a self) -> &'a OldAtPath;
 
-    fn join(&'a self, subpath: PathToPrepend) -> Result<ObjAtPath<'a,Obj,NewAtPath>,()> {
+    fn prepend(&'a self, subpath: PathToPrepend) -> Result<ObjAtPath<'a,Obj,NewAtPath>,()> {
         let obj = self._obj();
         let path = self._path().clone().prepend(subpath);
         Ok(ObjAtPath::from_at(obj,path))

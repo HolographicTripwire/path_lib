@@ -1,9 +1,9 @@
 //mod inner;
-mod switcher;
+mod unit;
 mod series;
 mod pair;
 
-pub use switcher::*;
+pub use unit::*;
 pub use series::*;
 pub use pair::*;
 
@@ -13,8 +13,6 @@ pub use pair::*;
 /// 
 /// All types implementing [PathPrimitive] automatically implement [Path] 
 pub trait PathPrimitive: Clone {}
-impl PathPrimitive for () {}
-impl <P: PathPrimitive> Path for P {}
 
 /// A trait for types that can be used as a parameter in [`HasChildren::get_descendant`](crate::HasDescendants::get_descendant).
 /// 

@@ -1,5 +1,5 @@
 
-use crate::{obj_at_path::ObjAtPath, paths::{Path, PathPair, PathPrimitive, PathSeries, PathSwitcher}};
+use crate::{obj_at_path::ObjAtPath, paths::{Path, PathPair, PathPrimitive, PathSeries, PathUnit, PrivatePathUnit}};
 
 // Define HasChildren
 pub trait HasChildren<'a, Primitive, Child>: Sized where
@@ -43,12 +43,12 @@ WithDescendants: HasChildren<'a,Primitive,Descendant> {
 
 // Implement get_descendant for a switcher
 impl <'a,WithDescendants,Joiner,Descendant> 
-HasDescendants<'a,PathSwitcher,Joiner,Descendant>
+HasDescendants<'a,PathUnit,Joiner,Descendant>
 for WithDescendants where
 Descendant: 'a,
-WithDescendants: HasChildren<'a,(),Descendant> {
-    fn get_descendant(&'a self, _: &PathSwitcher) -> Result<&'a Descendant,()> {
-        self.get_child(&())
+WithDescendants: HasChildren<'a,PrivatePathUnit,Descendant> {
+    fn get_descendant(&'a self, _: &PathUnit) -> Result<&'a Descendant,()> {
+        self.get_child(&PrivatePathUnit)
     }
 }
 

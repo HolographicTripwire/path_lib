@@ -42,4 +42,5 @@ mod from {
         fn from(value: It) -> Self { Self::new(value.into_iter().map(|v| v.into())) }
     }
 }
-mod into{}
+mod into{
+}

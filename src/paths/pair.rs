@@ -39,7 +39,7 @@ mod into {
     use super::*;
     
     impl <S: Path> Into<PathSeries<S>> for PathPair<S,S> {
-        fn into(self) -> PathSeries<S> { PathSeries::new([self.left,self.right]) }
+        fn into(self) -> PathSeries<S> { PathSeries::<S>::new([self.left,self.right]) }
     }
     impl <S: Path> Into<PathSeries<S>> for PathPair<S,PathSeries<S>> {
         fn into(mut self) -> PathSeries<S> { self.right.prepend(self.left); self.right }
@@ -48,6 +48,6 @@ mod into {
         fn into(mut self) -> PathSeries<S> { self.left.append(self.right); self.left }
     }
     impl <S: Path> Into<PathSeries<S>> for PathPair<PathSeries<S>,PathSeries<S>> {
-        fn into(self) -> PathSeries<S> { PathSeries::new([self.left.into_paths(),self.right.into_paths()].concat()) }
+        fn into(self) -> PathSeries<S> { PathSeries::<S>::new([self.left.into_paths(),self.right.into_paths()].concat()) }
     }    
 }

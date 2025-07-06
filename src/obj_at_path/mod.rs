@@ -1,7 +1,7 @@
 mod appendable;
 mod children;
 
-use crate::{has_children::HasDescendants, paths::{Path, PathPair}};
+use crate::{has_descendants::HasDescendants, paths::{Path, PathPair}};
 
 pub use appendable::ObjAtAppendablePath;
 pub use children::ObjAtPathWithChildren;

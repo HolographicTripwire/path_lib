@@ -23,16 +23,3 @@ pub trait Path: Clone {
     fn pair_append<R: Path>(self, other: R) -> PathPair<Self,R> { PathPair::new(self,other) }
     fn pair_prepend<L: Path>(self, other: L) -> PathPair<L,Self> { PathPair::new(other,self) }
 }
-
-impl <S: Path> Into<PathSeries<S>> for PathPair<S,S> {
-    fn into(self) -> PathSeries<S> { PathSeries::new([self.left,self.right]) }
-}
-impl <S: Path> Into<PathSeries<S>> for PathPair<S,PathSeries<S>> {
-    fn into(mut self) -> PathSeries<S> { self.right.prepend(self.left); self.right }
-}
-impl <S: Path> Into<PathSeries<S>> for PathPair<PathSeries<S>,S> {
-    fn into(mut self) -> PathSeries<S> { self.left.append(self.right); self.left }
-}
-impl <S: Path> Into<PathSeries<S>> for PathPair<PathSeries<S>,PathSeries<S>> {
-    fn into(self) -> PathSeries<S> { PathSeries::new([self.left.into_paths(),self.right.into_paths()].concat()) }
-}

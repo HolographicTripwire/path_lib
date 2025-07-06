@@ -15,22 +15,31 @@ impl <P:Path> PathSeries<P> where {
     pub fn into_paths(self) -> Vec<P> { self.0 }
 }
 
-impl <P:Path, IP:Into<P>, It: IntoIterator<Item=IP>> From<It> for PathSeries<P> {
-    fn from(value: It) -> Self { Self::new(value.into_iter().map(|v| v.into())) }
-}
-
 impl <P:Path> Path for PathSeries<P> {}
 
-impl <P:Path> Clone for PathSeries<P> where {
-    fn clone(&self) -> Self { Self(self.0.clone()) }
-}
+mod implement_common_traits {
+    use super::*;
 
-impl <P: Path + PartialEq> PartialEq for PathSeries<P> {
-    fn eq(&self, other: &Self) -> bool { self.0 == other.0 }
-} impl <P: Path + Eq> Eq for PathSeries<P> {}
+    impl <P:Path> Clone for PathSeries<P> where {
+        fn clone(&self) -> Self { Self(self.0.clone()) }
+    }
 
-impl <P: Path + std::fmt::Debug> std::fmt::Debug for PathSeries<P> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_tuple("PathSeries").field(&self.0).finish()
+    impl <P: Path + PartialEq> PartialEq for PathSeries<P> {
+        fn eq(&self, other: &Self) -> bool { self.0 == other.0 }
+    } impl <P: Path + Eq> Eq for PathSeries<P> {}
+
+    impl <P: Path + std::fmt::Debug> std::fmt::Debug for PathSeries<P> {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            f.debug_tuple("PathSeries").field(&self.0).finish()
+        }
     }
 }
+
+mod from {
+    use super::*;
+
+    impl <P:Path, IP:Into<P>, It: IntoIterator<Item=IP>> From<It> for PathSeries<P> {
+        fn from(value: It) -> Self { Self::new(value.into_iter().map(|v| v.into())) }
+    }
+}
+mod into{}

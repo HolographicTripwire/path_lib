@@ -1,10 +1,10 @@
 mod appendable;
-mod children;
+mod descendants;
 
 use crate::{has_descendants::HasDescendants, paths::{Path, PathPair}};
 
 pub use appendable::ObjAtAppendablePath;
-pub use children::ObjAtPathWithChildren;
+pub use descendants::{ObjAtPathWithChildren,ObjAtPathWithDescendants};
 
 pub struct ObjAtPath<'a, Obj, AtPath:Path> {
     obj: &'a Obj,

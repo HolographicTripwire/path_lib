@@ -1,13 +1,12 @@
-use crate::paths::{Path, PathSeries};
+use crate::paths::{PathPrimitive, PathSeries};
 
 #[derive(Clone,PartialEq,Eq,Debug)]
 pub struct PathUnit;
+impl PathPrimitive for PathUnit {}
 
 impl PathUnit {
     pub fn new() -> Self { Self }
 }
-
-impl Path for PathUnit {}
 
 mod from {
     use super::*;

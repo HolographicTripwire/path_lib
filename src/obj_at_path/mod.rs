@@ -25,7 +25,7 @@ impl <'a, Obj, AtPath:Path> ObjAtPath<'a,Obj,AtPath> {
         ObjAtPath::from_at(obj,path)
     }
 
-    pub fn replace_path<NewPath: Path + From<AtPath>>(self) -> ObjAtPath<'a,Obj,NewPath> {
-        ObjAtPath::from_at(self.obj, NewPath::from(self.path))
+    pub fn replace_path<NewPath: Path>(self, function: impl Fn(AtPath) -> NewPath) -> ObjAtPath<'a,Obj,NewPath> {
+        ObjAtPath::from_at(self.obj, (function)(self.path))
     }
 }

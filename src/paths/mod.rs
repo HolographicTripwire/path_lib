@@ -13,6 +13,9 @@ pub use pair::*;
 /// 
 /// All types implementing [PathPrimitive] automatically implement [Path] 
 pub trait PathPrimitive: Clone {}
+impl <P: PathPrimitive> Path for P {}
+
+impl PathPrimitive for () {}
 
 /// A trait for types that can be used as a parameter in [`HasChildren::get_descendant`](crate::HasDescendants::get_descendant).
 /// 

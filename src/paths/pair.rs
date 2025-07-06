@@ -37,6 +37,10 @@ mod into {
     use crate::paths::PathSeries;
 
     use super::*;
+
+    impl <L:Path, R:Path> Into<PathSeries<PathPair<L,R>>> for PathPair<L,R> {
+        fn into(self) -> PathSeries<PathPair<L,R>> { PathSeries::new([self]) }
+    }
     
     impl <S: Path> Into<PathSeries<S>> for PathPair<S,S> {
         fn into(self) -> PathSeries<S> { PathSeries::<S>::new([self.left,self.right]) }

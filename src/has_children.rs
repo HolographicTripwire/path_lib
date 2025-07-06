@@ -1,5 +1,5 @@
 
-use crate::{obj_at_path::ObjAtPath, paths::{Path, PathPair, PathPrimitive, PathSeries, PathUnit, PrivatePathUnit}};
+use crate::{obj_at_path::ObjAtPath, paths::{Path, PathPair, PathPrimitive, PathSeries, PathUnit}};
 
 // Define HasChildren
 pub trait HasChildren<'a, Primitive, Child>: Sized where
@@ -46,9 +46,9 @@ impl <'a,WithDescendants,Joiner,Descendant>
 HasDescendants<'a,PathUnit,Joiner,Descendant>
 for WithDescendants where
 Descendant: 'a,
-WithDescendants: HasChildren<'a,PrivatePathUnit,Descendant> {
+WithDescendants: HasChildren<'a,(),Descendant> {
     fn get_descendant(&'a self, _: &PathUnit) -> Result<&'a Descendant,()> {
-        self.get_child(&PrivatePathUnit)
+        self.get_child(&())
     }
 }
 

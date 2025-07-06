@@ -43,4 +43,9 @@ mod from {
     }
 }
 mod into{
+    use super::*;
+
+    impl <S: Path> Into<PathSeries<PathSeries<S>>> for PathSeries<S> {
+        fn into(self) -> PathSeries<PathSeries<S>> { PathSeries::new([self]) }
+    }
 }

@@ -1,4 +1,4 @@
-use crate::paths::{Path, PathPrimitive};
+use crate::paths::{Path, PathSeries};
 
 #[derive(Clone,PartialEq,Eq,Debug)]
 pub struct PathUnit;
@@ -17,9 +17,9 @@ mod from {
     }
 }
 mod into {
-}
+    use super::*;
 
-#[derive(Clone)]
-pub (crate) struct PrivatePathUnit;
-impl PathPrimitive for PrivatePathUnit {}
-impl <P: PathPrimitive> Path for P {}
+    impl Into<PathSeries<PathUnit>> for PathUnit {
+        fn into(self) -> PathSeries<PathUnit> { PathSeries::new([self]) }
+    }
+}

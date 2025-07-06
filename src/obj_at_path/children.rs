@@ -9,8 +9,7 @@ NewAtPath:'a + Path {
     fn valid_primitive_paths(&'a self) -> impl IntoIterator<Item = Joiner> { self._obj().valid_primitive_paths() }
     fn get_child(&'a self, path: &Joiner) -> Result<&'a Child,()> { self._obj().get_child(path) }
     fn get_located_child(&'a self, path: Joiner) -> Result<ObjAtPath<'a,Child,NewAtPath>,()> {
-        let obj = self._obj();
-        let child = obj.get_child(&path)?;
+        let child = self._obj().get_child(&path)?;
         let new_path = self._path().clone().append(path);
         Ok(ObjAtPath::from_at(child, new_path))
     }

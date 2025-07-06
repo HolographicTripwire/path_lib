@@ -20,6 +20,27 @@ impl PathPrimitive for () {}
 /// 
 /// Whenever a struct implements [`HasDescendants<'a, DescendantPath, Joiner, Descendant>`](crate::HasDescendants), [`get_descendant(path)`](crate::HasDescendants::get_descendant) can be called on that struct with some `path: Path` to get a [Result] whose [Ok] value contains an object implementing `Descendant`
 pub trait Path: Clone {
+    /// Create a new [PathPair] with this as the left path and some other as the right
     fn pair_append<R: Path>(self, other: R) -> PathPair<Self,R> { PathPair::new(self,other) }
+    /// Create a new [PathPair] with this as the right path and some other as the left
     fn pair_prepend<L: Path>(self, other: L) -> PathPair<L,Self> { PathPair::new(other,self) }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_pair_append() {
+        let pair = 5.pair_append("Hello");
+        assert_eq!(pair.left, 5);
+        assert_eq!(pair.right, "Hello");
+    }
+
+    #[test]
+    fn test_pair_prepend() {
+        let pair = 5.pair_prepend("Hello");
+        assert_eq!(pair.left, "Hello");
+        assert_eq!(pair.right, 5);
+    }
 }

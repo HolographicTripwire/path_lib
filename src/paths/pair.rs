@@ -4,24 +4,37 @@ pub struct PathPair<L:Path, R:Path>{ pub left: L, pub right: R }
 
 impl <L:Path, R:Path> PathPair<L,R> {
     pub fn new(left: L, right: R) -> Self { Self{left, right} }
-}
-
-impl <L:Path, R:Path> Path for PathPair<L,R> {}
+} impl <L:Path, R:Path> Path for PathPair<L,R> {}
 
 mod implement_common_traits {
     use super::*;
 
+    // Implement Clone
     impl <L:Path, R:Path> Clone for PathPair<L,R> {
         fn clone(&self) -> Self { Self::new(self.left.clone(), self.right.clone()) }
     }
 
+    // Implement PartialEq and Eq
     impl <L: Path + PartialEq, R: Path + PartialEq> PartialEq for PathPair<L,R> {
         fn eq(&self, other: &Self) -> bool { self.left == other.left && self.right == other.right }
     } impl <L: Path + Eq, R: Path + Eq> Eq for PathPair<L,R> {}
 
+    // Implement Debug
     impl <L: Path + std::fmt::Debug, R: Path + std::fmt::Debug> std::fmt::Debug for PathPair<L,R> {
         fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
             f.debug_struct("PathPair").field("left", &self.left).field("right", &self.right).finish()
+        }
+    }
+
+    #[cfg(test)]
+    mod tests {
+        use super::super::*;
+
+        #[test]
+        fn test_clone() {
+            let to_clone = PathPair::new("5", 5);
+            let cloned = to_clone.clone();
+            assert_eq!(to_clone.left, cloned.left)
         }
     }
 }

@@ -4,7 +4,7 @@ use crate::{has_descendants::INVALID_PATH_MESSAGE, paths::{PathPair, PathPrimiti
 impl <'a,Primitive,WithDescendants,Descendant> 
 HasDescendants<'a,Primitive,(),Descendant>
 for WithDescendants where
-Descendant: 'a,
+Descendant: 'a + PartialEq,
 Primitive: PathPrimitive,
 WithDescendants: HasChildren<'a,Primitive,Descendant> {
     fn valid_paths(&self) -> impl IntoIterator<Item=Primitive>
@@ -18,7 +18,7 @@ impl <'a,Subpath,Type>
 HasDescendants<'a,PathSeries<Subpath>,(),Type>
 for Type where
 Subpath: 'a + Path,
-Type: 'a + HasDescendants<'a,Subpath,(),Type> {
+Type: 'a + PartialEq + HasDescendants<'a,Subpath,(),Type> {
     fn get_descendant(&'a self, path: &PathSeries<Subpath>) -> Result<&'a Type,()> {
         let mut result = self;
         for subpath in path.paths()
@@ -41,8 +41,8 @@ impl <'a,LeftPath,RightPath,WithDescendants,Joiner,Descendant>
 HasDescendants<'a,PathPair<LeftPath,RightPath>,Joiner,Descendant>
 for WithDescendants where
 LeftPath: Path, RightPath: Path,
-Descendant: 'a,
-Joiner: 'a + HasDescendants<'a,RightPath,(),Descendant>,
+Descendant: 'a + PartialEq,
+Joiner: 'a + PartialEq + HasDescendants<'a,RightPath,(),Descendant>,
 WithDescendants: HasDescendants<'a,LeftPath,(),Joiner> {
     fn get_descendant(&'a self, path: &PathPair<LeftPath,RightPath>) -> Result<&'a Descendant,()> {
         let joiner = self.get_descendant(&path.left)?;

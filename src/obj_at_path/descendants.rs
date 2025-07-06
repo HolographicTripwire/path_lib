@@ -1,7 +1,7 @@
 use crate::{obj_at_path::{ObjAtAppendablePath, ObjAtPath}, paths::{PathPair, PathPrimitive}, HasChildren, HasDescendants, Path};
 
 pub trait ObjAtPathWithChildren<'a,OldObj,Child,OldAtPath,Joiner,NewAtPath,Output>: ObjAtAppendablePath<'a, (), OldObj, Child, OldAtPath, Joiner> where
-Child: 'a,
+Child: 'a + PartialEq,
 OldObj:'a + HasChildren<'a,Joiner,Child>,
 OldAtPath:'a + Path,
 Joiner:'a + PathPrimitive {
@@ -26,14 +26,14 @@ Joiner:'a + PathPrimitive {
 }
 
 impl <'a,OldObj,Child,OldAtPath,Joiner,NewAtPath,Output,SelfType> ObjAtPathWithChildren<'a,OldObj,Child,OldAtPath,Joiner,NewAtPath,Output> for SelfType where
-Child: 'a,
+Child: 'a + PartialEq,
 OldObj:'a + HasChildren<'a,Joiner,Child>,
 OldAtPath:'a + Path,
 Joiner:'a + PathPrimitive,
 SelfType: ObjAtAppendablePath<'a, (), OldObj, Child, OldAtPath, Joiner> {}
 
 pub trait ObjAtPathWithDescendants<'a,J,OldObj,Descendant,OldAtPath,Joiner,NewAtPath,Output>: ObjAtAppendablePath<'a, J, OldObj, Descendant, OldAtPath, Joiner> where
-Descendant: 'a,
+Descendant: 'a + PartialEq,
 OldObj:'a + HasDescendants<'a,Joiner,J,Descendant>,
 OldAtPath:'a + Path,
 Joiner:'a + Path {
@@ -58,7 +58,7 @@ Joiner:'a + Path {
 }
 
 impl <'a,J,OldObj,Descendant,OldAtPath,Joiner,NewAtPath,Output,SelfType> ObjAtPathWithDescendants<'a,J,OldObj,Descendant,OldAtPath,Joiner,NewAtPath,Output> for SelfType where
-Descendant: 'a,
+Descendant: 'a + PartialEq,
 OldObj:'a + HasDescendants<'a,Joiner,J,Descendant>,
 OldAtPath:'a + Path,
 Joiner:'a + PathPrimitive,

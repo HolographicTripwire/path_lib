@@ -2,7 +2,7 @@ use crate::{obj_at_path::ObjAtPath, paths::PathPair, HasDescendants, Path};
 
 pub trait ObjAtAppendablePath<'a,J,
 OldObj: 'a + HasDescendants<'a,PathToAppend,J,NewObj>,
-NewObj: 'a,
+NewObj: 'a + PartialEq,
 OldAtPath: 'a + Path,
 PathToAppend: Path> {
     fn _obj(&'a self) -> &'a OldObj;
@@ -16,8 +16,8 @@ PathToAppend: Path> {
 }
 
 impl <'a,J,
-OldObj: 'a + HasDescendants<'a,PathToAppend,J,NewObj>,
-NewObj: 'a,
+OldObj: 'a + PartialEq + HasDescendants<'a,PathToAppend,J,NewObj>,
+NewObj: 'a + PartialEq,
 OldAtPath: 'a + Path,
 PathToAppend: Path>
 ObjAtAppendablePath<'a,J,OldObj,NewObj,OldAtPath,PathToAppend> for

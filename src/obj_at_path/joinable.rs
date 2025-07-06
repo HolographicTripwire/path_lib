@@ -29,17 +29,17 @@ ObjAtPath<'a,OldObj,OldAtPath> {
 }
 
 pub trait ObjAtPrependablePath<'a,
-Obj: 'a,
+Obj,
 OldAtPath: 'a + PrependablePath<PathToPrepend,Output=NewAtPath>,
 PathToPrepend: Path,
 NewAtPath: 'a + Path> {
     fn _obj(&'a self) -> &'a Obj;
     fn _path(&'a self) -> &'a OldAtPath;
 
-    fn prepend(&'a self, subpath: PathToPrepend) -> Result<ObjAtPath<'a,Obj,NewAtPath>,()> {
+    fn prepend(&'a self, subpath: PathToPrepend) -> ObjAtPath<'a,Obj,NewAtPath> {
         let obj = self._obj();
         let path = self._path().clone().prepend(subpath);
-        Ok(ObjAtPath::from_at(obj,path))
+        ObjAtPath::from_at(obj,path)
     }
 }
 

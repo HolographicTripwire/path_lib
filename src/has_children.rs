@@ -2,20 +2,20 @@
 use crate::{obj_at_path::ObjAtPath, paths::{Path, PathPair, PathPrimitive, PathSeries, PathSwitcher}};
 
 // Define HasChildren
-pub trait HasChildren<'a, Primitive, Child>: 'a + Sized where
+pub trait HasChildren<'a, Primitive, Child>: Sized where
 Primitive: PathPrimitive,
 Child: 'a {
-    fn valid_primitive_paths(&'a self) -> impl IntoIterator<Item = Primitive>;
-    fn get_child(&'a self, path: &Primitive) -> Result<&'a Child,()>;
+    fn valid_primitive_paths(&self) -> impl IntoIterator<Item = Primitive>;
+    fn get_child(&self, path: &Primitive) -> Result<&'a Child,()>;
     
-    fn get_located_child(&'a self, path: Primitive) -> Result<ObjAtPath<'a,Child,Primitive>,()>
+    fn get_located_child(&self, path: Primitive) -> Result<ObjAtPath<'a,Child,Primitive>,()>
         { Ok(ObjAtPath::from_at(self.get_child(&path)?,path)) }
-    fn get_children(&'a self) -> impl IntoIterator<Item = &'a Child> {
+    fn get_children(&self) -> impl IntoIterator<Item = &'a Child> {
         self.valid_primitive_paths()
             .into_iter()
             .map(|path| self.get_child(&path).expect("valid_primitive_paths returned an invalid path"))
     }
-    fn get_located_children(&'a self) -> impl IntoIterator<Item = ObjAtPath<'a,Child,Primitive>> {
+    fn get_located_children(&self) -> impl IntoIterator<Item = ObjAtPath<'a,Child,Primitive>> {
         self.valid_primitive_paths()
             .into_iter()
             .map(|path| { self.get_located_child(path).expect("valid_primitive_paths returned an invalid path")})

@@ -1,8 +1,10 @@
 mod joinable;
+mod children;
 
 use crate::{has_children::HasDescendants, paths::{Path}};
 
 pub use joinable::{ObjAtAppendablePath,ObjAtPrependablePath};
+pub use children::ObjAtPathWithChildren;
 
 pub struct ObjAtPath<'a, Obj, AtPath:Path> {
     obj: &'a Obj,

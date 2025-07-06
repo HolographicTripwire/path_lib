@@ -1,9 +1,9 @@
-mod joinable;
+mod appendable;
 mod children;
 
-use crate::{has_children::HasDescendants, paths::{Path}};
+use crate::{has_children::HasDescendants, paths::{Path, PathPair}};
 
-pub use joinable::{ObjAtAppendablePath,ObjAtPrependablePath};
+pub use appendable::ObjAtAppendablePath;
 pub use children::ObjAtPathWithChildren;
 
 pub struct ObjAtPath<'a, Obj, AtPath:Path> {
@@ -18,4 +18,10 @@ impl <'a, Obj, AtPath:Path> ObjAtPath<'a,Obj,AtPath> {
 
     pub fn obj(&'a self) -> &'a Obj { &self.obj }
     pub fn path(&'a self) -> &'a AtPath { &self.path } 
+    
+    pub fn prepend<PathToPrepend: Path>(&'a self, subpath: PathToPrepend) -> ObjAtPath<'a,Obj,PathPair<PathToPrepend,AtPath>> {
+        let obj = self.obj();
+        let path = self.path().clone().prepend(subpath);
+        ObjAtPath::from_at(obj,path)
+    }
 }

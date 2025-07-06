@@ -19,44 +19,7 @@ impl <P: PathPrimitive> Path for P {}
 /// A trait for types that can be used as a parameter in [`HasChildren::get_descendant`](crate::HasDescendants::get_descendant).
 /// 
 /// Whenever a struct implements [`HasDescendants<'a, DescendantPath, Joiner, Descendant>`](crate::HasDescendants), [`get_descendant(path)`](crate::HasDescendants::get_descendant) can be called on that struct with some `path: Path` to get a [Result] whose [Ok] value contains an object implementing `Descendant`
-pub trait Path: Clone {}
-
-/// A trait for [Path] objects that can be joined with specific, other types of [Path] objects, to produce some new [Path] object [Output](JoinablePath::Output)
-/// 
-/// Currently all [Path] objects `L` implenent [JoinablePath<R>], with an [Output](JoinablePath::Output) of [PathPair<L,R>](PathPair).
-/// 
-/// Future updates may have:
-/// - [`PathPrimitive`].join([`PathPrimitive`]) -> [`PathSeries<PathPrimitive>`](PathSeries)
-/// - [`PathPrimitive`].join([`PathSeries<PathPrimitive>`](PathSeries)) -> [`PathSeries<PathPrimitive>`](PathSeries)
-/// - [`PathSeries<PathPrimitive>`](PathSeries).join([`PathPrimitive`]) -> [`PathSeries<PathPrimitive>`](PathSeries)
-/// - [`PathSeries<PathPrimitive>`](PathSeries).join([`PathSeries<PathPrimitive>`](PathSeries)) -> [`PathSeries<PathPrimitive>`](PathSeries)
-pub trait AppendablePath<P>: Path where P: Path {
-    /// The [Path] produced by joining this path to `P`
-    type Output: Path;
-
-    /// Join this path with another to produce a path of type [Output](JoinablePath::Output)
-    fn append(self, path: P) -> Self::Output;
-}
-
-impl <L, R> AppendablePath<R> for L where L: Path, R: Path {
-    type Output = PathPair<L, R>;
-
-    fn append(self, other: R) -> PathPair<L,R>
-        { PathPair::new(self, other) }
-}
-
-/// An inverse version of [AppendablePath]
-pub trait PrependablePath<P>: Path where P: Path {
-    /// The [Path] produced by joining this path to `P`
-    type Output: Path;
-
-    /// Join this path with another to produce a path of type [Output](JoinablePath::Output)
-    fn prepend(self, path: P) -> Self::Output;
-}
-
-impl <L, R, O: Path> PrependablePath<L> for R where 
-L: AppendablePath<R,Output=O>, R: Path  {
-    type Output = O;
-    fn prepend(self, path: L) -> Self::Output
-        { path.append(self) }
+pub trait Path: Clone {
+    fn append<R: Path>(self, other: R) -> PathPair<Self,R> { PathPair::new(self,other) }
+    fn prepend<L: Path>(self, other: L) -> PathPair<L,Self> { PathPair::new(other,self) }
 }

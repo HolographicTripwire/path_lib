@@ -25,3 +25,11 @@ NewAtPath:'a + Path {
             .map(|path| self.get_located_child(path).expect("valid_primitive_paths returned an invalid path"))
     }
 }
+
+impl <'a,OldObj,Child,OldAtPath,Joiner,NewAtPath,Output,SelfType> ObjAtPathWithChildren<'a,OldObj,Child,OldAtPath,Joiner,NewAtPath,Output> for SelfType where
+Child: 'a,
+OldObj:'a + HasChildren<'a,Joiner,Child>,
+OldAtPath:'a + AppendablePath<Joiner,Output=NewAtPath>,
+Joiner:'a + PathPrimitive,
+NewAtPath:'a + Path ,
+SelfType: ObjAtAppendablePath<'a, (), OldObj, Child, OldAtPath, Joiner, NewAtPath> {}

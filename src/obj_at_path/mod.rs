@@ -21,7 +21,10 @@ impl <'a, Obj, AtPath:Path> ObjAtPath<'a,Obj,AtPath> {
     
     pub fn prepend<PathToPrepend: Path>(&'a self, subpath: PathToPrepend) -> ObjAtPath<'a,Obj,PathPair<PathToPrepend,AtPath>> {
         let obj = self.obj();
-        let path = self.path().clone().prepend(subpath);
+        let path = self.path().clone().pair_prepend(subpath);
         ObjAtPath::from_at(obj,path)
     }
+
+    pub fn replace_path<NewPath: Path + From<AtPath>>(self) -> ObjAtPath<'a,Obj,NewPath>
+        { ObjAtPath::from_at(self.obj, self.path.into()) }
 }

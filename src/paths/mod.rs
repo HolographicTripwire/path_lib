@@ -20,6 +20,19 @@ impl <P: PathPrimitive> Path for P {}
 /// 
 /// Whenever a struct implements [`HasDescendants<'a, DescendantPath, Joiner, Descendant>`](crate::HasDescendants), [`get_descendant(path)`](crate::HasDescendants::get_descendant) can be called on that struct with some `path: Path` to get a [Result] whose [Ok] value contains an object implementing `Descendant`
 pub trait Path: Clone {
-    fn append<R: Path>(self, other: R) -> PathPair<Self,R> { PathPair::new(self,other) }
-    fn prepend<L: Path>(self, other: L) -> PathPair<L,Self> { PathPair::new(other,self) }
+    fn pair_append<R: Path>(self, other: R) -> PathPair<Self,R> { PathPair::new(self,other) }
+    fn pair_prepend<L: Path>(self, other: L) -> PathPair<L,Self> { PathPair::new(other,self) }
+}
+
+impl <S: Path> Into<PathSeries<S>> for PathPair<S,S> {
+    fn into(self) -> PathSeries<S> { PathSeries::new([self.left,self.right]) }
+}
+impl <S: Path> Into<PathSeries<S>> for PathPair<S,PathSeries<S>> {
+    fn into(mut self) -> PathSeries<S> { self.right.prepend(self.left); self.right }
+}
+impl <S: Path> Into<PathSeries<S>> for PathPair<PathSeries<S>,S> {
+    fn into(mut self) -> PathSeries<S> { self.left.append(self.right); self.left }
+}
+impl <S: Path> Into<PathSeries<S>> for PathPair<PathSeries<S>,PathSeries<S>> {
+    fn into(self) -> PathSeries<S> { PathSeries::new([self.left.into_paths(),self.right.into_paths()].concat()) }
 }

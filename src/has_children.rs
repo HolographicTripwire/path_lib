@@ -75,7 +75,7 @@ Descendant: 'a,
 Joiner: 'a + HasDescendants<'a,RightPath,(),Descendant>,
 WithDescendants: HasDescendants<'a,LeftPath,(),Joiner> {
     fn get_descendant(&'a self, path: &PathPair<LeftPath,RightPath>) -> Result<&'a Descendant,()> {
-        let joiner = self.get_descendant(path.left())?;
-        joiner.get_descendant(path.right())
+        let joiner = self.get_descendant(&path.left)?;
+        joiner.get_descendant(&path.right)
     }
 }

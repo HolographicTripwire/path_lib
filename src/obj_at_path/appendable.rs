@@ -10,7 +10,7 @@ PathToAppend: Path> {
 
     fn append(&'a self, subpath: PathToAppend) -> Result<ObjAtPath<'a,NewObj,PathPair<OldAtPath,PathToAppend>>,()> {
         let obj = self._obj().get_descendant(&subpath)?;
-        let path = self._path().clone().append(subpath);
+        let path = self._path().clone().pair_append(subpath);
         Ok(ObjAtPath::from_at(obj,path))
     }
 }

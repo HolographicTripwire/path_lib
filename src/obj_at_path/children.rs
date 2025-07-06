@@ -9,7 +9,7 @@ Joiner:'a + PathPrimitive {
     fn get_child(&'a self, path: &Joiner) -> Result<&'a Child,()> { self._obj().get_child(path) }
     fn get_located_child(&'a self, path: Joiner) -> Result<ObjAtPath<'a,Child,PathPair<OldAtPath,Joiner>>,()> {
         let child = self._obj().get_child(&path)?;
-        let new_path = self._path().clone().append(path);
+        let new_path = self._path().clone().pair_append(path);
         Ok(ObjAtPath::from_at(child, new_path))
     }
     

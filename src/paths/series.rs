@@ -42,10 +42,3 @@ mod from {
         fn from(value: It) -> Self { Self::new(value.into_iter().map(|v| v.into())) }
     }
 }
-mod into{
-    use super::*;
-
-    impl <S: Path> Into<PathSeries<PathSeries<S>>> for PathSeries<S> {
-        fn into(self) -> PathSeries<PathSeries<S>> { PathSeries::new([self]) }
-    }
-}

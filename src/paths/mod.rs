@@ -26,6 +26,9 @@ pub trait Path: Clone {
     fn pair_append<R: Path>(self, other: R) -> PathPair<Self,R> { PathPair::new(self,other) }
     /// Create a new [PathPair] with this as the right path and some other as the left
     fn pair_prepend<L: Path>(self, other: L) -> PathPair<L,Self> { PathPair::new(other,self) }
+    
+    /// Create a new [PathSeries] object with this as the only parameter
+    fn into_unary_series(self) -> PathSeries<Self> { PathSeries::new([self]) }
 }
 
 #[cfg(test)]

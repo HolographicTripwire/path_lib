@@ -71,29 +71,37 @@ mod from {
         fn from(value: (IL,IR)) -> Self { Self::new(value.0.into(),value.1.into()) }
     }
 }
-/// Implement [Into<T>](Into) for PathPair for a variety of T
+/// Implement [Into<T>](Into) on [PathPair] for a variety of T
 mod into {
     use crate::paths::PathSeries;
 
     use super::*;
-
-    // Pair to series of pairs: PathPair<L,R> -> PathSeries<PathPair<L,R>>
-    impl <L:Path, R:Path> Into<PathSeries<PathPair<L,R>>> for PathPair<L,R> {
-        fn into(self) -> PathSeries<PathPair<L,R>> { PathSeries::new([self]) }
-    }
     
-    // Homogenous pair to series: PathPair<S,S> -> PathSeries<S>
-    impl <S: Path> Into<PathSeries<S>> for PathPair<S,S> {
-        fn into(self) -> PathSeries<S> { PathSeries::<S>::new([self.left,self.right]) }
-    }
-    // PathPair<S,PathSeries<S>>: PathPair<S,S>
-    impl <S: Path> Into<PathSeries<S>> for PathPair<S,PathSeries<S>> {
-        fn into(mut self) -> PathSeries<S> { self.right.prepend(self.left); self.right }
-    }
-    impl <S: Path> Into<PathSeries<S>> for PathPair<PathSeries<S>,S> {
-        fn into(mut self) -> PathSeries<S> { self.left.append(self.right); self.left }
-    }
-    impl <S: Path> Into<PathSeries<S>> for PathPair<PathSeries<S>,PathSeries<S>> {
-        fn into(self) -> PathSeries<S> { PathSeries::<S>::new([self.left.into_paths(),self.right.into_paths()].concat()) }
-    }    
+    impl <S: Path> PathPair<S,S> {
+        /// Convert this [PathPair<S,S>] to a [PathSeries\<S>](PathSeries)
+        /// 
+        /// E.g. PathPair(1,5) -> PathSeries([1,5])
+        pub fn into_series(self) -> PathSeries<S> { PathSeries::<S>::new([self.left,self.right]) }
+    } impl <S: Path> Into<PathSeries<S>> for PathPair<S,S> { fn into(self) -> PathSeries<S> { self.into_series() } }
+
+    impl <S: Path> PathPair<S,PathSeries<S>> {
+        /// Convert this [PathPair<S,PathSeries\<S>>] to a [PathSeries\<S>](PathSeries)
+        /// 
+        /// E.g. PathPair(1,\[5,2]) -> PathSeries(\[1,5,2])
+        pub fn into_series(mut self) -> PathSeries<S> { self.right.prepend(self.left); self.right }
+    } impl <S: Path> Into<PathSeries<S>> for PathPair<S,PathSeries<S>> { fn into(self) -> PathSeries<S> { self.into_series() } }
+
+    impl <S: Path> PathPair<PathSeries<S>,S> {
+        /// Convert this [PathPair<PathSeries\<S>,S>] to a [PathSeries\<S>](PathSeries)
+        /// 
+        /// E.g. PathPair(\[1,5],2) -> PathSeries(\[1,5,2])
+        pub fn into_series(mut self) -> PathSeries<S> { self.left.append(self.right); self.left }
+    } impl <S: Path> Into<PathSeries<S>> for PathPair<PathSeries<S>,S> { fn into(self) -> PathSeries<S> { self.into_series() } }
+
+    impl <S: Path> PathPair<PathSeries<S>,PathSeries<S>> {
+        /// Convert this [PathPair<PathSeries\<S>,PathSeries\<S>>] to a [PathSeries\<S>](PathSeries)
+        /// 
+        /// E.g. PathPair(\[1,5],\[2,7]) -> PathSeries(\[1,5,2,7])
+        pub fn into_joined_series(self) -> PathSeries<S> { PathSeries::<S>::new([self.left.into_paths(),self.right.into_paths()].concat()) }
+    } impl <S: Path> Into<PathSeries<S>> for PathPair<PathSeries<S>,PathSeries<S>> { fn into(self) -> PathSeries<S> { self.into_joined_series() } }
 }

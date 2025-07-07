@@ -1,11 +1,13 @@
 use crate::paths::{Path};
 
+/// A [Path] made of two subpaths (which are also [Paths](Path))
 pub struct PathPair<L:Path, R:Path>{ pub left: L, pub right: R }
 
 impl <L:Path, R:Path> PathPair<L,R> {
     pub fn new(left: L, right: R) -> Self { Self{left, right} }
 } impl <L:Path, R:Path> Path for PathPair<L,R> {}
 
+/// Implement common traits for [PathPair]
 mod implement_common_traits {
     use super::*;
 
@@ -34,30 +36,57 @@ mod implement_common_traits {
         fn test_clone() {
             let to_clone = PathPair::new("5", 5);
             let cloned = to_clone.clone();
-            assert_eq!(to_clone.left, cloned.left)
+            assert_eq!(to_clone.left, cloned.left);
+            assert_eq!(to_clone.right, cloned.right);
+        }
+
+        #[test]
+        fn test_eq_with_equal() {
+            let left = PathPair::new("5", 5);
+            let right = PathPair::new("5", 5);
+            assert_eq!(left, right)
+        }
+
+        #[test]
+        fn test_eq_with_inequal() {
+            let left = PathPair::new("5", 5);
+            let right = PathPair::new("5",4);
+            assert_ne!(left, right)
+        }
+        
+        #[test]
+        fn test_debug() {
+            let left = PathPair::new("5", 5);
+            assert_eq!(format!("{:#?}", left), "PathPair {\n    left: \"5\",\n    right: 5,\n}")
         }
     }
 }
 
+/// Implement [From<T>](From) for PathPair for a variety of T
 mod from {
     use super::*;
 
+    // Tuple to pair: (L,R) -> PathPair<L,R>
     impl <L:Path, IL:Into<L>, R:Path, IR:Into<R>> From<(IL,IR)> for PathPair<L,R> {
         fn from(value: (IL,IR)) -> Self { Self::new(value.0.into(),value.1.into()) }
     }
 }
+/// Implement [Into<T>](Into) for PathPair for a variety of T
 mod into {
     use crate::paths::PathSeries;
 
     use super::*;
 
+    // Pair to series of pairs: PathPair<L,R> -> PathSeries<PathPair<L,R>>
     impl <L:Path, R:Path> Into<PathSeries<PathPair<L,R>>> for PathPair<L,R> {
         fn into(self) -> PathSeries<PathPair<L,R>> { PathSeries::new([self]) }
     }
     
+    // Homogenous pair to series: PathPair<S,S> -> PathSeries<S>
     impl <S: Path> Into<PathSeries<S>> for PathPair<S,S> {
         fn into(self) -> PathSeries<S> { PathSeries::<S>::new([self.left,self.right]) }
     }
+    // PathPair<S,PathSeries<S>>: PathPair<S,S>
     impl <S: Path> Into<PathSeries<S>> for PathPair<S,PathSeries<S>> {
         fn into(mut self) -> PathSeries<S> { self.right.prepend(self.left); self.right }
     }

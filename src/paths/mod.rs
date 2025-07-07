@@ -1,6 +1,8 @@
-//mod inner;
+/// Implements [PathUnit]
 mod unit;
+/// Implements [PathSeries]
 mod series;
+/// Implements [PathPair]
 mod pair;
 
 pub use unit::*;

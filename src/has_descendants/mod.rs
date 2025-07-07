@@ -9,7 +9,7 @@ const INVALID_PATH_MESSAGE: &str = "valid_paths returned an invalid path";
 // Define HasChildren
 pub trait HasChildren<'a, PathToChild, Child>: Sized where
 PathToChild: PathPrimitive,
-Child: 'a + PartialEq {
+Child: 'a {
     fn valid_primitive_paths(&self) -> impl IntoIterator<Item = PathToChild>;
     fn get_child(&'a self, path: &PathToChild) -> Result<&'a Child,()>;
     
@@ -25,17 +25,11 @@ Child: 'a + PartialEq {
             .into_iter()
             .map(|path| { self.get_located_child(path).expect(INVALID_PRIMITIVE_PATH_MESSAGE)})
     }
-
-    fn find_child(&'a self, to_find: &Child) -> impl IntoIterator<Item = PathToChild> {
-        self.get_located_children().into_iter()
-            .filter(move |child| child.obj() == to_find)
-            .map(|child| child.path().clone())
-    }
 }
 
 // Define HasDescendants
 pub trait HasDescendants<'a,PathToDescendant,_Joiner,Descendant> where
-Descendant: 'a + PartialEq, PathToDescendant:Path {
+Descendant: 'a, PathToDescendant:Path {
     fn valid_paths(&'a self) -> impl IntoIterator<Item=PathToDescendant>;
     fn get_descendant(&'a self, path: &PathToDescendant) -> Result<&'a Descendant,()>;
 
@@ -50,11 +44,5 @@ Descendant: 'a + PartialEq, PathToDescendant:Path {
         self.valid_paths()
             .into_iter()
             .map(|path| { self.get_located_descendant(path).expect(INVALID_PATH_MESSAGE) })
-    }
-
-    fn find_descendant(&'a self, to_find: &Descendant) -> impl IntoIterator<Item = PathToDescendant> {
-        self.get_located_descendants().into_iter()
-            .filter(move |descendant| descendant.obj() == to_find)
-            .map(|child| child.path().clone())
     }
 }

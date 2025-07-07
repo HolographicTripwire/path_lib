@@ -30,8 +30,10 @@ Type: 'a + PartialEq + HasDescendants<'a,Subpath,(),Type> {
         <Self as HasDescendants<'a,Subpath,(),Type>>::valid_paths(self).into_iter()
             .flat_map(move |path| {
                 let descendant = self.get_descendant(&path).expect(INVALID_PATH_MESSAGE);
-                let valid_paths = <Self as HasDescendants<'a,PathSeries<Subpath>,(),Type>>::valid_paths(descendant);
-                valid_paths.into_iter().map(|mut subpath: PathSeries<Subpath>| { subpath.prepend(path.clone()); subpath }).collect::<Vec<_>>()
+                let valid_subpaths = <Self as HasDescendants<'a,PathSeries<Subpath>,(),Type>>::valid_paths(descendant);
+                [PathSeries::new([path.clone()])].into_iter().chain(
+                    valid_subpaths.into_iter().map(|mut subpath: PathSeries<Subpath>| { subpath.prepend(path.clone()); subpath }))
+                    .collect::<Vec<_>>()
             })
     }
 }

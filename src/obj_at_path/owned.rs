@@ -1,7 +1,7 @@
 use crate::{obj_at_path::ObjAtPath, paths::PathPair, HasDescendants, Path};
 
 impl <'a,Obj: Clone, AtPath: Path> ObjAtPath<'a,Obj,AtPath> {
-    fn into_owned(self) -> OwnedObjAtPath<Obj,AtPath> { OwnedObjAtPath::from_at(self.obj.clone(), self.path) }
+    pub fn into_owned(self) -> OwnedObjAtPath<Obj,AtPath> { OwnedObjAtPath::from_at(self.obj.clone(), self.path) }
 }
 
 #[derive(Clone)]

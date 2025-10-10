@@ -61,5 +61,5 @@ impl <'a,J,OldObj,Descendant,OldAtPath,Joiner,SelfType> ObjAtPathWithDescendants
 Descendant: 'a + PartialEq,
 OldObj:'a + HasDescendants<'a,Joiner,J,Descendant>,
 OldAtPath:'a + Path,
-Joiner:'a + PathPrimitive,
+Joiner:'a + Path,
 SelfType: ObjAtAppendablePath<'a, J, OldObj, Descendant, OldAtPath, Joiner> {}

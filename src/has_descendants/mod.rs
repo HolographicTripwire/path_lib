@@ -5,11 +5,15 @@ mod implementations;
 const INVALID_PRIMITIVE_PATH_MESSAGE: &str = "valid_primitive_paths returned an invalid path";
 const INVALID_PATH_MESSAGE: &str = "valid_paths returned an invalid path";
 
+pub trait HasPrimitivePaths<PathToChild,Child> where
+PathToChild: PathPrimitive {
+    fn valid_primitive_paths(&self) -> impl IntoIterator<Item = PathToChild>;
+}
+
 // Define HasChildren
-pub trait HasChildren<'a, PathToChild, Child>: Sized where
+pub trait HasChildren<'a, PathToChild, Child>: HasPrimitivePaths<PathToChild, Child> where
 PathToChild: PathPrimitive,
 Child: 'a {
-    fn valid_primitive_paths(&self) -> impl IntoIterator<Item = PathToChild>;
     fn get_child(&'a self, path: &PathToChild) -> Result<&'a Child,()>;
     
     fn get_located_child(&'a self, path: PathToChild) -> Result<ObjAtPath<'a,Child,PathToChild>,()>
@@ -27,9 +31,9 @@ Child: 'a {
             .map(|path| { self.get_located_child(path).expect(INVALID_PRIMITIVE_PATH_MESSAGE)})
     }
 }
-pub trait HasCloneChildren<'a, PathToChild, Child>: HasChildren<'a,PathToChild,Child> where
+pub trait HasCloneChildren<PathToChild, Child>: HasPrimitivePaths<PathToChild, Child> where
 PathToChild: PathPrimitive,
-Child: Clone + 'a {
+Child: Clone {
     fn get_child_owned(&self, path: &PathToChild) -> Result<Child,()>;
     
     fn get_located_child_owned(&self, path: PathToChild) -> Result<OwnedObjAtPath<Child,PathToChild>,()>
@@ -69,8 +73,8 @@ Descendant: 'a, PathToDescendant:Path {
     }
 }
 
-pub trait HasCloneDescendants<'a,PathToDescendant,_Joiner,Descendant>: HasDescendants<'a,PathToDescendant,_Joiner,Descendant> where
-Descendant: 'a + Clone, PathToDescendant:Path {
+pub trait HasCloneDescendants<PathToDescendant,_Joiner,Descendant> where
+Descendant: Clone, PathToDescendant:Path {
     fn valid_paths_owned(&self) -> impl IntoIterator<Item=PathToDescendant>;
     
     fn get_descendant_owned(&self, path: &PathToDescendant) -> Result<Descendant,()>;

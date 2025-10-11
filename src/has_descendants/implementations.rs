@@ -13,12 +13,12 @@ WithDescendants: HasChildren<'a,Primitive,Descendant> {
         { self.get_child(atom) }
 }
 // Implement get_owned_descendants for a Primitive path
-impl <'a,Primitive,WithDescendants,Descendant> 
-HasCloneDescendants<'a,Primitive,(),Descendant>
+impl <Primitive,WithDescendants,Descendant> 
+HasCloneDescendants<Primitive,(),Descendant>
 for WithDescendants where
-Descendant: 'a + PartialEq + Clone,
+Descendant: PartialEq + Clone,
 Primitive: PathPrimitive,
-WithDescendants: HasCloneChildren<'a,Primitive,Descendant> {
+WithDescendants: HasCloneChildren<Primitive,Descendant> {
     fn valid_paths_owned(&self) -> impl IntoIterator<Item=Primitive>
         { self.valid_primitive_paths() }
     fn get_descendant_owned(&self, atom: &Primitive) -> Result<Descendant,()>
@@ -50,11 +50,11 @@ Type: 'a + PartialEq + HasDescendants<'a,Subpath,(),Type> {
     }
 }
 // Implement get_descendant_owned for a series
-impl <'a,Subpath,Type>
-HasCloneDescendants<'a,PathSeries<Subpath>,(),Type>
+impl <Subpath,Type>
+HasCloneDescendants<PathSeries<Subpath>,(),Type>
 for Type where
-Subpath: 'a + Path,
-Type: 'a + PartialEq + Clone + HasCloneDescendants<'a,Subpath,(),Type> {
+Subpath: Path,
+Type: PartialEq + Clone + HasCloneDescendants<Subpath,(),Type> {
     fn get_descendant_owned(&self, path: &PathSeries<Subpath>) -> Result<Type,()> {
         match path.paths().split_first() {
             // If there are subpath, iterate through the paths - getting each descendant
@@ -70,10 +70,10 @@ Type: 'a + PartialEq + Clone + HasCloneDescendants<'a,Subpath,(),Type> {
     }
 
     fn valid_paths_owned(&self) -> impl IntoIterator<Item=PathSeries<Subpath>> {
-        <Self as HasCloneDescendants<'a,Subpath,(),Type>>::valid_paths_owned(self).into_iter()
+        <Self as HasCloneDescendants<Subpath,(),Type>>::valid_paths_owned(self).into_iter()
             .flat_map(move |path| {
                 let descendant = self.get_descendant_owned(&path).expect(INVALID_PATH_MESSAGE);
-                let valid_subpaths = <Self as HasCloneDescendants<'a,PathSeries<Subpath>,(),Type>>::valid_paths_owned(&descendant);
+                let valid_subpaths = <Self as HasCloneDescendants<PathSeries<Subpath>,(),Type>>::valid_paths_owned(&descendant);
                 [PathSeries::new([path.clone()])].into_iter().chain(
                     valid_subpaths.into_iter().map(|mut subpath: PathSeries<Subpath>| { subpath.prepend(path.clone()); subpath }))
                     .collect::<Vec<_>>()
@@ -105,20 +105,20 @@ WithDescendants: HasDescendants<'a,LeftPath,(),Joiner> {
 }
 
 // Implement get_owned_descendant for a joiner
-impl <'a,LeftPath,RightPath,WithDescendants,Joiner,Descendant> 
-HasCloneDescendants<'a,PathPair<LeftPath,RightPath>,Joiner,Descendant>
+impl <LeftPath,RightPath,WithDescendants,Joiner,Descendant> 
+HasCloneDescendants<PathPair<LeftPath,RightPath>,Joiner,Descendant>
 for WithDescendants where
 LeftPath: Path, RightPath: Path,
-Descendant: 'a + PartialEq + Clone,
-Joiner: 'a + PartialEq + HasCloneDescendants<'a,RightPath,(),Descendant> + Clone,
-WithDescendants: HasCloneDescendants<'a,LeftPath,(),Joiner> {
+Descendant: PartialEq + Clone,
+Joiner: PartialEq + HasCloneDescendants<RightPath,(),Descendant> + Clone,
+WithDescendants: HasCloneDescendants<LeftPath,(),Joiner> {
     fn get_descendant_owned(&self, path: &PathPair<LeftPath,RightPath>) -> Result<Descendant,()> {
         let joiner = self.get_descendant_owned(&path.left)?;
         joiner.get_descendant_owned(&path.right)
     }
     
     fn valid_paths_owned(&self) -> impl IntoIterator<Item=PathPair<LeftPath,RightPath>> {
-        <Self as HasCloneDescendants<'a,LeftPath,(),Joiner>>::valid_paths_owned(self).into_iter()
+        <Self as HasCloneDescendants<LeftPath,(),Joiner>>::valid_paths_owned(self).into_iter()
             .flat_map(move |path| {
                 let descendant = self.get_descendant_owned(&path).expect(INVALID_PATH_MESSAGE); 
                 let valid_paths = descendant.valid_paths_owned();

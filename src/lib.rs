@@ -5,7 +5,7 @@ mod has_descendants;
 /// Implements [ObjAtPath](obj_at_path::ObjAtPath), for storing objects which are located at a known [Path] within another object
 pub mod obj_at_path;
 
-pub use has_descendants::{HasChildren,HasDescendants};
+pub use has_descendants::{HasChildren,HasCloneChildren,HasDescendants,HasCloneDescendants};
 pub use paths::{Path};
 
 /// General implementations to use 

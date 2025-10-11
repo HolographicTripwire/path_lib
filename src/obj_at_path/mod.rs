@@ -5,7 +5,7 @@ mod owned;
 use crate::{has_descendants::HasDescendants, paths::{Path, PathPair}};
 
 pub use appendable::{ObjAtAppendablePath};
-pub use descendants::{ObjAtPathWithChildren,ObjAtPathWithCloneChildren,ObjAtPathWithDescendants};
+pub use descendants::{ObjAtPathWithChildren,ObjAtPathWithDescendants};
 pub use owned::OwnedObjAtPath;
 
 #[derive(Clone)]

@@ -5,13 +5,8 @@ mod implementations;
 const INVALID_PRIMITIVE_PATH_MESSAGE: &str = "valid_primitive_paths returned an invalid path";
 const INVALID_PATH_MESSAGE: &str = "valid_paths returned an invalid path";
 
-pub trait HasPrimitivePaths<PathToChild,Child> where
-PathToChild: PathPrimitive {
-    
-}
-
 // Define HasChildren
-pub trait HasChildren<'a, PathToChild, Child>: HasPrimitivePaths<PathToChild, Child> where
+pub trait HasChildren<'a, PathToChild, Child> where
 PathToChild: PathPrimitive,
 Child: 'a {
     fn valid_primitive_paths(&self) -> impl IntoIterator<Item = PathToChild>;

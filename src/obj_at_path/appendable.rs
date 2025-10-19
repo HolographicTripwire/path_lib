@@ -23,7 +23,7 @@ PathToAppend: Path> {
 impl <'a,J,
 OldObj: 'a + PartialEq + HasDescendants<'a,PathToAppend,J,NewObj>,
 NewObj: 'a + PartialEq,
-OldAtPath: 'a + Path,
+OldAtPath: Path,
 PathToAppend: Path>
 ObjAtAppendablePath<'a,J,OldObj,NewObj,OldAtPath,PathToAppend> for
 ObjAtPath<'a,OldObj,OldAtPath> {

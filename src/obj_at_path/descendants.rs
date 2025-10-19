@@ -3,8 +3,8 @@ use crate::{obj_at_path::{ObjAtAppendablePath, ObjAtPath, OwnedObjAtPath}, paths
 pub trait ObjAtPathWithChildren<'a,OldObj,Child,OldAtPath,Joiner>: ObjAtAppendablePath<'a, (), OldObj, Child, OldAtPath, Joiner> where
 Child: 'a + PartialEq,
 OldObj:'a + HasChildren<'a,Joiner,Child>,
-OldAtPath:'a + Path,
-Joiner:'a + PathPrimitive {
+OldAtPath: Path,
+Joiner: PathPrimitive {
     fn valid_primitive_paths(&'a self) -> impl IntoIterator<Item = Joiner> { self._obj().valid_primitive_paths() }
     
     fn get_child(&'a self, path: &Joiner) -> Result<&'a Child,()> { self._obj().get_child(path) }
@@ -49,15 +49,15 @@ Joiner:'a + PathPrimitive {
 impl <'a,OldObj,Child,OldAtPath,Joiner,SelfType> ObjAtPathWithChildren<'a,OldObj,Child,OldAtPath,Joiner> for SelfType where
 Child: 'a + PartialEq,
 OldObj:'a + HasChildren<'a,Joiner,Child>,
-OldAtPath:'a + Path,
-Joiner:'a + PathPrimitive,
+OldAtPath: Path,
+Joiner: PathPrimitive,
 SelfType: ObjAtAppendablePath<'a, (), OldObj, Child, OldAtPath, Joiner> {}
 
 pub trait ObjAtPathWithDescendants<'a,J,OldObj,Descendant,OldAtPath,Joiner>: ObjAtAppendablePath<'a, J, OldObj, Descendant, OldAtPath, Joiner> where
 Descendant: 'a + PartialEq,
 OldObj:'a + HasDescendants<'a,Joiner,J,Descendant>,
-OldAtPath:'a + Path,
-Joiner:'a + Path {
+OldAtPath: Path,
+Joiner: Path {
     fn valid_paths(&'a self) -> impl IntoIterator<Item = Joiner> { self._obj().valid_paths() }
     fn valid_paths_owned(&'a self) -> impl IntoIterator<Item = Joiner> where J: Clone, Descendant: Clone { self._obj().valid_paths_owned() }
     

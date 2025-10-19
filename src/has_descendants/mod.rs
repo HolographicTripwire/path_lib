@@ -12,7 +12,7 @@ Child: 'a {
     fn valid_primitive_paths(&self) -> impl IntoIterator<Item = PathToChild>;
 
     fn get_child(&'a self, path: &PathToChild) -> Result<&'a Child,()>;
-    fn get_child_owned(&self, path: &PathToChild) -> Result<Child,()> where Child: Clone;
+    fn get_child_owned(&self, path: &PathToChild) -> Result<Child,()> where Child: Clone { let _ = path; todo!() }
     
     fn get_located_child(&'a self, path: PathToChild) -> Result<ObjAtPath<'a,Child,PathToChild>,()>
         { Ok(ObjAtPath::from_at(self.get_child(&path)?,path)) }

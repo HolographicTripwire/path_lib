@@ -30,3 +30,14 @@ ObjAtPath<'a,OldObj,OldAtPath> {
     fn _obj(&self) -> &OldObj { self.obj() }
     fn _path(&self) -> &OldAtPath { self.path() }
 }
+
+impl <'a,J,
+OldObj: 'a + Clone + PartialEq + HasDescendants<'a,PathToAppend,J,NewObj>,
+NewObj: 'a + PartialEq,
+OldAtPath: Path,
+PathToAppend: Path>
+ObjAtAppendablePath<'a,J,OldObj,NewObj,OldAtPath,PathToAppend> for
+OwnedObjAtPath<OldObj,OldAtPath> {
+    fn _obj(&self) -> &OldObj { self.obj() }
+    fn _path(&self) -> &OldAtPath { self.path() }
+}

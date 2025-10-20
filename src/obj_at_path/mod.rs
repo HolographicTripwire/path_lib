@@ -1,12 +1,12 @@
 mod appendable;
-mod descendants;
 mod owned;
+mod descendants;
 
 use crate::{has_descendants::HasDescendants, paths::{Path, PathPair}};
 
 pub use appendable::{ObjAtAppendablePath};
-pub use descendants::{ObjAtPathWithChildren,ObjAtPathWithDescendants};
 pub use owned::OwnedObjAtPath;
+pub use descendants::{ObjAtPathWithChildren,ObjAtPathWithDescendants};
 
 #[derive(Clone)]
 pub struct ObjAtPath<'a, Obj, AtPath:Path> {

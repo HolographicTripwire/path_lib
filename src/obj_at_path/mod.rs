@@ -8,7 +8,7 @@ pub use appendable::{ObjAtAppendablePath};
 pub use owned::OwnedObjAtPath;
 pub use descendants::{ObjAtPathWithChildren,ObjAtPathWithDescendants};
 
-#[derive(Clone)]
+#[derive(Clone,PartialEq,Eq)]
 pub struct ObjAtPath<'a, Obj, AtPath:Path> {
     obj: &'a Obj,
     path: AtPath,

@@ -4,7 +4,7 @@ impl <'a,Obj: Clone, AtPath: Path> ObjAtPath<'a,Obj,AtPath> {
     pub fn into_owned(self) -> OwnedObjAtPath<Obj,AtPath> { OwnedObjAtPath::from_at(self.obj.clone(), self.path) }
 }
 
-#[derive(Clone)]
+#[derive(Clone,PartialEq,Eq)]
 pub struct OwnedObjAtPath<Obj: Clone, AtPath:Path> {
     obj: Obj,
     path: AtPath,

@@ -5,8 +5,8 @@ Child: 'a + PartialEq,
 OldObj:'a + HasChildren<'a,Joiner,Child>,
 OldAtPath: Path,
 Joiner: PathPrimitive {
-    fn valid_primitive_paths(&'a self) -> impl IntoIterator<Item = Joiner> { self._obj().valid_primitive_paths() }
-    
+    fn valid_primitive_paths<'b>(&'b self) -> impl IntoIterator<Item = Joiner> where OldObj: 'b { self._obj().valid_primitive_paths() }
+
     fn get_child(&'a self, path: &Joiner) -> Result<&'a Child,()> { self._obj().get_child(path) }
     fn get_child_owned(&self, path: &Joiner) -> Result<Child,()>  where Child: Clone
         { self._obj().get_child_owned(path) }

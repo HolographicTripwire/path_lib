@@ -7,8 +7,7 @@ const INVALID_PATH_MESSAGE: &str = "valid_paths returned an invalid path";
 
 // Define HasChildren
 pub trait HasChildren<'a, PathToChild, Child> where
-PathToChild: PathPrimitive,
-Child: 'a {
+PathToChild: PathPrimitive {
     fn valid_primitive_paths(&self) -> impl IntoIterator<Item = PathToChild>;
 
     fn get_child(&'a self, path: &PathToChild) -> Result<&'a Child,()>;
@@ -19,7 +18,7 @@ Child: 'a {
     fn get_located_child_owned(&self, path: PathToChild) -> Result<OwnedObjAtPath<Child,PathToChild>,()> where Child: Clone
         { Ok(OwnedObjAtPath::from_at(self.get_child_owned(&path)?,path)) }
     
-    fn get_children(&'a self) -> impl IntoIterator<Item = &'a Child> {
+    fn get_children(&'a self) -> impl IntoIterator<Item = &'a Child> where Child: 'a {
         self.valid_primitive_paths()
             .into_iter()
             .map(|path| self.get_child(&path).expect(INVALID_PRIMITIVE_PATH_MESSAGE))
@@ -30,7 +29,7 @@ Child: 'a {
             .map(|path| self.get_child_owned(&path).expect(INVALID_PRIMITIVE_PATH_MESSAGE))
     }
 
-    fn get_located_children(&'a self) -> impl IntoIterator<Item = ObjAtPath<'a,Child,PathToChild>> {
+    fn get_located_children(&'a self) -> impl IntoIterator<Item = ObjAtPath<'a,Child,PathToChild>> where Child: 'a {
         self.valid_primitive_paths()
             .into_iter()
             .map(|path| { self.get_located_child(path).expect(INVALID_PRIMITIVE_PATH_MESSAGE)})

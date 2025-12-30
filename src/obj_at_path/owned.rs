@@ -1,11 +1,11 @@
 use crate::{obj_at_path::ObjAtPath, paths::PathPair, HasDescendants, Path};
 
 impl <'a,Obj: Clone, AtPath: Path> ObjAtPath<'a,Obj,AtPath> {
-    pub fn into_owned(self) -> OwnedObjAtPath<Obj,AtPath> { OwnedObjAtPath::from_at(self.obj.clone(), self.path) }
+    pub fn into_owned(self) -> OwnedObjAtPath<Obj,AtPath> { OwnedObjAtPath::from_at(self.obj.to_owned(), self.path) }
 }
 
 #[derive(Clone,PartialEq,Eq)]
-pub struct OwnedObjAtPath<Obj: Clone, AtPath:Path> {
+pub struct OwnedObjAtPath<Obj, AtPath:Path> {
     obj: Obj,
     path: AtPath,
 }
@@ -17,6 +17,7 @@ impl <'a, Obj: 'a + Clone, AtPath:Path> OwnedObjAtPath<Obj,AtPath> {
 
     pub fn obj(&'a self) -> &'a Obj { &self.obj }
     pub fn path(&'a self) -> &'a AtPath { &self.path } 
+    pub fn into_obj_and_path(self) -> (Obj,AtPath) { (self.obj, self.path) }
     
     pub fn prepend<PathToPrepend: Path>(&'a self, subpath: PathToPrepend) -> OwnedObjAtPath<Obj,PathPair<PathToPrepend,AtPath>> {
         let obj = self.obj();

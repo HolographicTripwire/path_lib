@@ -21,6 +21,7 @@ impl <'a, Obj, AtPath:Path> ObjAtPath<'a,Obj,AtPath> {
 
     pub fn obj(&'a self) -> &'a Obj { &self.obj }
     pub fn path(&'a self) -> &'a AtPath { &self.path } 
+    pub fn into_obj_and_path(self) -> (&'a Obj, AtPath) { (self.obj, self.path) }
     
     pub fn prepend<PathToPrepend: Path>(&'a self, subpath: PathToPrepend) -> ObjAtPath<'a,Obj,PathPair<PathToPrepend,AtPath>> {
         let obj = self.obj();

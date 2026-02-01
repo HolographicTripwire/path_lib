@@ -2,13 +2,13 @@ mod appendable;
 mod owned;
 mod descendants;
 
-use crate::{has_descendants::HasDescendants, paths::{Path, PathPair}};
+use crate::{HasChildren, has_descendants::HasDescendants, paths::{Path, PathPair, PathPrimitive}};
 
 pub use appendable::{ObjAtAppendablePath};
 pub use owned::OwnedObjAtPath;
 pub use descendants::{ObjAtPathWithChildren,ObjAtPathWithDescendants};
 
-#[derive(Clone,PartialEq,Eq)]
+#[derive(Clone,PartialEq,Eq,Debug)]
 pub struct ObjAtPath<'a, Obj, AtPath:Path> {
     obj: &'a Obj,
     path: AtPath,
@@ -22,6 +22,11 @@ impl <'a, Obj, AtPath:Path> ObjAtPath<'a,Obj,AtPath> {
     pub fn obj(&'a self) -> &'a Obj { &self.obj }
     pub fn path(&'a self) -> &'a AtPath { &self.path } 
     pub fn into_obj_and_path(self) -> (&'a Obj, AtPath) { (self.obj, self.path) }
+    pub fn into_located_children<Child,PathToAppend>(self) -> impl IntoIterator<Item = ObjAtPath<'a,Child,PathPair<AtPath,PathToAppend>>> where Obj: HasChildren<PathToAppend,Child>, PathToAppend: PathPrimitive, Child: 'a {
+        let (obj, old_path) = self.into_obj_and_path();
+        obj.valid_primitive_paths().into_iter()
+            .map(move |path| ObjAtPath::from_at(obj.get_child(&path).expect("msg"), old_path.clone().pair_append(path)))
+    }
     
     pub fn prepend<PathToPrepend: Path>(&'a self, subpath: PathToPrepend) -> ObjAtPath<'a,Obj,PathPair<PathToPrepend,AtPath>> {
         let obj = self.obj();

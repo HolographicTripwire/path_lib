@@ -19,7 +19,7 @@ Joiner: PathPrimitive {
     fn get_located_child_owned(&self, path: Joiner) -> Result<OwnedObjAtPath<Child,PathPair<OldAtPath,Joiner>>,()> where Child: Clone {
         let child = self._obj().get_child_owned(&path)?;
         let new_path = self._path().clone().pair_append(path);
-        Ok(OwnedObjAtPath::from_at(child, new_path))
+        Ok(OwnedObjAtPath::from_inner(child, new_path))
     }
     
     fn get_children(&'a self) -> impl IntoIterator<Item = &'a Child> where OldObj: 'a, Child: 'a { 
@@ -74,7 +74,7 @@ Joiner: Path {
     fn get_located_descendant_owned(&self, path: Joiner) -> Result<OwnedObjAtPath<Descendant,PathPair<OldAtPath,Joiner>>,()> where J: Clone, Descendant: Clone {
         let child = self._obj().get_descendant_owned(&path)?;
         let new_path = self._path().clone().pair_append(path);
-        Ok(OwnedObjAtPath::from_at(child, new_path))
+        Ok(OwnedObjAtPath::from_inner(child, new_path))
     }
     
     fn get_descendants(&'a self) -> impl IntoIterator<Item = &'a Descendant> { 

@@ -65,7 +65,7 @@ mod tests {
                 TestTree2::Leaf(_) => vec![],
                 TestTree2::Tree(subtree) => subtree.into_iter()
                     .enumerate()
-                    .map(|x| OwnedObjAtPath::from_at(x.1, x.0))
+                    .map(|x| OwnedObjAtPath::from_inner(x.1, x.0))
                     .collect(),
             }
         }

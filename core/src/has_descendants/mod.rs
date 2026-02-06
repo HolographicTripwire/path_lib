@@ -16,7 +16,7 @@ PathToChild: PathPrimitive {
     fn get_located_child<'a>(&'a self, path: PathToChild) -> Result<ObjAtPath<'a,Child,PathToChild>,()>
         { Ok(ObjAtPath::from_inner(self.get_child(&path)?,path)) }
     fn get_located_child_owned(&self, path: PathToChild) -> Result<OwnedObjAtPath<Child,PathToChild>,()> where Child: Clone
-        { Ok(OwnedObjAtPath::from_at(self.get_child_owned(&path)?,path)) }
+        { Ok(OwnedObjAtPath::from_inner(self.get_child_owned(&path)?,path)) }
     
     fn get_children<'a>(&'a self) -> impl IntoIterator<Item = &'a Child> where Child: 'a {
         self.valid_primitive_paths()
@@ -53,7 +53,7 @@ PathToDescendant:Path {
     fn get_located_descendant(&'a self, path: PathToDescendant) -> Result<ObjAtPath<'a,Descendant,PathToDescendant>,()>
         { Ok(ObjAtPath::from_inner(self.get_descendant(&path)?, path)) }
     fn get_located_descendant_owned(&self, path: PathToDescendant) -> Result<OwnedObjAtPath<Descendant,PathToDescendant>,()> where _Joiner: Clone, Descendant: Clone
-        { Ok(OwnedObjAtPath::from_at(self.get_descendant_owned(&path)?, path)) }
+        { Ok(OwnedObjAtPath::from_inner(self.get_descendant_owned(&path)?, path)) }
 
     fn get_descendants(&'a self) -> impl IntoIterator<Item = &'a Descendant> where Descendant: 'a {
         self.valid_paths()

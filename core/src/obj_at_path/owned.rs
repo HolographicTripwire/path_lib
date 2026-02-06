@@ -1,7 +1,7 @@
 use crate::{obj_at_path::ObjAtPath, paths::PathPair, HasDescendants, Path};
 
 impl <'a,Obj: Clone, AtPath: Path> ObjAtPath<'a,Obj,AtPath> {
-    pub fn into_owned(self) -> OwnedObjAtPath<Obj,AtPath> { OwnedObjAtPath::from_at(self.obj.to_owned(), self.path) }
+    pub fn into_owned(self) -> OwnedObjAtPath<Obj,AtPath> { OwnedObjAtPath::from_inner(self.obj.to_owned(), self.path) }
 }
 
 #[derive(Clone,PartialEq,Eq,Debug)]
@@ -10,8 +10,8 @@ pub struct OwnedObjAtPath<Obj, AtPath:Path> {
     path: AtPath,
 }
 impl <'a, Obj: 'a + Clone, AtPath:Path> OwnedObjAtPath<Obj,AtPath> {
-    pub fn from_at(obj_at: Obj, path: AtPath) -> Self { Self { obj: obj_at, path }}
-    pub fn from_in<Joiner,O: HasDescendants<'a, AtPath,Joiner,Obj>>(obj_in: &'a O, path: AtPath) -> Result<Self,()> {
+    pub fn from_inner(obj_at: Obj, path: AtPath) -> Self { Self { obj: obj_at, path }}
+    pub fn from_outer<Joiner,O: HasDescendants<'a, AtPath,Joiner,Obj>>(obj_in: &'a O, path: AtPath) -> Result<Self,()> {
         Ok(ObjAtPath::from_outer(obj_in, path)?.into_owned())
     }
 
@@ -22,10 +22,10 @@ impl <'a, Obj: 'a + Clone, AtPath:Path> OwnedObjAtPath<Obj,AtPath> {
     pub fn prepend<PathToPrepend: Path>(&'a self, subpath: PathToPrepend) -> OwnedObjAtPath<Obj,PathPair<PathToPrepend,AtPath>> {
         let obj = self.obj();
         let path = self.path().clone().pair_prepend(subpath);
-        OwnedObjAtPath::from_at(obj.clone(),path)
+        OwnedObjAtPath::from_inner(obj.clone(),path)
     }
 
     pub fn replace_path<NewPath: Path>(self, function: impl Fn(AtPath) -> NewPath) -> OwnedObjAtPath<Obj,NewPath> {
-        OwnedObjAtPath::from_at(self.obj, (function)(self.path))
+        OwnedObjAtPath::from_inner(self.obj, (function)(self.path))
     }
 }

@@ -7,7 +7,7 @@ pub trait ObjAtAppendablePath<'a,J, OldObj: HasDescendants<'a,PathToAppend,J,New
     fn append(&'a self, subpath: PathToAppend) -> Result<ObjAtPath<'a,NewObj,PathPair<OldAtPath,PathToAppend>>,()> where OldObj: 'a {
         let obj = self._obj().get_descendant(&subpath)?;
         let path = self._path().clone().pair_append(subpath);
-        Ok(ObjAtPath::from_at(obj,path))
+        Ok(ObjAtPath::from_inner(obj,path))
     }
     fn append_owned(&self, subpath: PathToAppend) -> Result<OwnedObjAtPath<NewObj,PathPair<OldAtPath,PathToAppend>>,()> where J: Clone, NewObj: Clone {
         let obj = self._obj().get_descendant_owned(&subpath)?;

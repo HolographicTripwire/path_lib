@@ -4,7 +4,7 @@ impl <'a,Obj: Clone, AtPath: Path> ObjAtPath<'a,Obj,AtPath> {
     pub fn into_owned(self) -> OwnedObjAtPath<Obj,AtPath> { OwnedObjAtPath::from_at(self.obj.to_owned(), self.path) }
 }
 
-#[derive(Clone,PartialEq,Eq)]
+#[derive(Clone,PartialEq,Eq,Debug)]
 pub struct OwnedObjAtPath<Obj, AtPath:Path> {
     obj: Obj,
     path: AtPath,
@@ -12,7 +12,7 @@ pub struct OwnedObjAtPath<Obj, AtPath:Path> {
 impl <'a, Obj: 'a + Clone, AtPath:Path> OwnedObjAtPath<Obj,AtPath> {
     pub fn from_at(obj_at: Obj, path: AtPath) -> Self { Self { obj: obj_at, path }}
     pub fn from_in<Joiner,O: HasDescendants<'a, AtPath,Joiner,Obj>>(obj_in: &'a O, path: AtPath) -> Result<Self,()> {
-        Ok(ObjAtPath::from_in(obj_in, path)?.into_owned())
+        Ok(ObjAtPath::from_outer(obj_in, path)?.into_owned())
     }
 
     pub fn obj(&'a self) -> &'a Obj { &self.obj }

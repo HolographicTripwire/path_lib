@@ -51,7 +51,7 @@ OldAtPath: Path,
 Joiner: PathPrimitive,
 SelfType: ObjAtAppendablePath<'a, (), OldObj, Child, OldAtPath, Joiner> {
     fn into_located_children_owned(self) -> impl IntoIterator<Item = OwnedObjAtPath<Child,PathPair<OldAtPath,Joiner>>> where OldObj: Clone, Child: Clone, Self: 'a {
-        self._obj().clone().to_located_children_owned().into_iter()
+        self._obj().clone().into_located_children_owned().into_iter()
             .map(move |obj| obj.prepend(self._path().to_owned()))
     }
 }

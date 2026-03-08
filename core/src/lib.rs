@@ -33,7 +33,7 @@ mod tests {
 
         fn get_child_owned(&self, _: &usize) -> Result<TestTree1,()> { unimplemented!() }
         #[allow(unreachable_code)]
-        fn to_located_children_owned(self) -> impl IntoIterator<Item = OwnedObjAtPath<TestTree1, usize>> { unimplemented!(); vec![] }
+        fn into_located_children_owned(self) -> impl IntoIterator<Item = OwnedObjAtPath<TestTree1, usize>> { unimplemented!(); vec![] }
     
         fn get_child(&self, path: &usize) -> Result<&TestTree1,()> {
             return match self {
@@ -60,7 +60,7 @@ mod tests {
             TestTree2::Tree(test_trees) => Ok(&test_trees[*path]),
         }}
 
-        fn to_located_children_owned(self) -> impl IntoIterator<Item = OwnedObjAtPath<TestTree2,usize>> where TestTree2: Clone {
+        fn into_located_children_owned(self) -> impl IntoIterator<Item = OwnedObjAtPath<TestTree2,usize>> where TestTree2: Clone {
             match self {
                 TestTree2::Leaf(_) => vec![],
                 TestTree2::Tree(subtree) => subtree.into_iter()

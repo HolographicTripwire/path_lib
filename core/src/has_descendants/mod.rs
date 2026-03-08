@@ -34,7 +34,7 @@ PathToChild: PathPrimitive {
             .into_iter()
             .map(|path| { self.get_located_child(path).expect(INVALID_PRIMITIVE_PATH_MESSAGE)})
     }
-    fn to_located_children_owned(self) -> impl IntoIterator<Item = OwnedObjAtPath<Child,PathToChild>> where Child: Clone, Self: Sized;
+    fn into_located_children_owned(self) -> impl IntoIterator<Item = OwnedObjAtPath<Child,PathToChild>> where Child: Clone, Self: Sized;
     fn get_located_children_owned(&self) -> impl IntoIterator<Item = OwnedObjAtPath<Child,PathToChild>> where Child: Clone {
         self.valid_primitive_paths()
             .into_iter()

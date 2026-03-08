@@ -10,10 +10,10 @@ pub struct OwnedObjAtPath<Obj, AtPath:Path> {
     path: AtPath,
 }
 impl <'a, Obj: 'a + Clone, AtPath:Path> OwnedObjAtPath<Obj,AtPath> {
-    pub fn from_inner(obj_at: Obj, path: AtPath) -> Self { Self { obj: obj_at, path }}
-    pub fn from_outer<Joiner,O: HasDescendants<'a, AtPath,Joiner,Obj>>(obj_in: &'a O, path: AtPath) -> Result<Self,()> {
-        Ok(ObjAtPath::from_outer(obj_in, path)?.into_owned())
-    }
+    pub fn from_inner(obj_at: Obj, path: AtPath) -> Self
+        { Self { obj: obj_at, path }}
+    pub fn from_outer<Joiner,O: HasDescendants<'a, AtPath,Joiner,Obj>>(obj_in: &'a O, path: AtPath) -> Result<Self,()>
+        { Ok(ObjAtPath::from_outer(obj_in, path)?.into_owned()) }
 
     pub fn obj(&'a self) -> &'a Obj { &self.obj }
     pub fn path(&'a self) -> &'a AtPath { &self.path } 

@@ -1,12 +1,12 @@
 use std::fmt::Display;
 
 use proc_macro2::{Span, TokenStream, TokenTree};
-use quote::{ToTokens, quote};
+use quote::quote;
 use syn::parse::{Parse, ParseStream};
 use syn::token::Paren;
-use syn::{parse_macro_input, punctuated::Punctuated, Token};
+use syn::{parse_macro_input, Token};
 use syn::{
-    Error, GenericParam, Ident, Lifetime, LitStr, Path, PredicateLifetime, PredicateType, Result as SynResult, TraitBound, Type, TypeParam, TypeParamBound, WhereClause, WherePredicate, bracketed, parenthesized
+    Error, Ident, Lifetime, LitStr, Path, PredicateLifetime, PredicateType, Result as SynResult, Type, WhereClause, WherePredicate, parenthesized
 };
 use proc_macro_crate::{crate_name, FoundCrate};
 
@@ -136,7 +136,7 @@ impl Parse for PathList {
 }
 
 struct MacroInput {
-    obj_type_paren: Paren,
+    _obj_type_paren: Paren,
     obj_type: TypeWithBounds,
     path_type: Type,
     unowned_name: Ident,
@@ -179,7 +179,7 @@ impl Parse for MacroInput {
 
         // Convert string into an Ident. Validate it is a valid Rust identifier by using Ident::new.
         // Note: Ident::new will accept many things; we assume user gives a valid identifier string.
-        Ok(MacroInput { obj_type_paren, obj_type, path_type, unowned_name, unowned_derives, owned_name, owned_derives })
+        Ok(MacroInput { _obj_type_paren: obj_type_paren, obj_type, path_type, unowned_name, unowned_derives, owned_name, owned_derives })
     }
 }
 
@@ -205,8 +205,11 @@ pub fn generate_obj_at_path_wrappers(input: proc_macro::TokenStream) -> proc_mac
     // Imports from path_lib
     let crate_id = "path_lib";
     let path = import(crate_id, "paths::Path");
+    let path_primitive = import(crate_id, "paths::PathPrimitive");
+    let path_pair = import(crate_id, "paths::PathPair");
     let obj_at_path = import(crate_id, "obj_at_path::ObjAtPath");
     let owned_obj_at_path = import(crate_id, "obj_at_path::OwnedObjAtPath");
+    let has_children = import(crate_id, "HasChildren");
     let has_descendants = import(crate_id, "HasDescendants");
 
     // Build final tokens:
@@ -225,8 +228,13 @@ pub fn generate_obj_at_path_wrappers(input: proc_macro::TokenStream) -> proc_mac
             pub fn path(&#lt self) -> &#lt #path_type { self.0.path() } 
 
             pub fn into_obj_and_path(self) -> (&#lt #obj_type, #path_type) { self.0.into_obj_and_path() }
+            pub fn into_located_children<Child,PathToAppend>(self) -> impl IntoIterator<Item = #obj_at_path<'a,Child,#path_pair<#path_type,PathToAppend>>>
+            where #obj_type: #has_children<PathToAppend,Child>, PathToAppend: #path_primitive, Child: #lt {
+                self.0.into_located_children()
+            }
             pub fn into_owned(self) -> #owned_struct<#generics> { #owned_struct(self.0.into_owned()) }
 
+            
             pub fn replace_path<NewPath: #path>(self, function: impl Fn(#path_type) -> NewPath) -> #obj_at_path<'a,#obj_type,NewPath>
                 { self.0.replace_path(function) }
         }
@@ -248,13 +256,15 @@ pub fn generate_obj_at_path_wrappers(input: proc_macro::TokenStream) -> proc_mac
             pub fn obj<#lt>(&#lt self) -> &#lt #obj_type where #obj_type: #lt { &self.0.obj() }
             pub fn path<#lt>(&#lt self) -> &#lt #path_type { &self.0.path() } 
             pub fn into_obj_and_path(self) -> (#obj_type,#path_type) { self.0.into_obj_and_path() }
+
+            pub fn replace_path<NewPath: #path>(self, function: impl Fn(#path_type) -> NewPath) -> #owned_obj_at_path<#obj_type,NewPath>
+                { self.0.replace_path(function) }
         }
         // Implement From<OwnedObjAtPath>
         impl <#generic_bounds> From<#owned_obj_at_path<#obj_type,#path_type>> for #owned_struct<#generics> {
             fn from(value: #owned_obj_at_path<#obj_type,#path_type>) -> Self
                 { #owned_struct(value) }
         }
-        
     };
 
     //panic!("{}", TokenStream::from(expanded).to_string());

@@ -11,35 +11,35 @@ PathToChild: PathPrimitive {
     fn valid_primitive_paths(&self) -> Vec<PathToChild>;
 
     fn get_child(&self, path: &PathToChild) -> Result<&Child,()>;
-    fn get_child_owned(&self, path: &PathToChild) -> Result<Child,()> where Child: Clone;
-    
-    fn get_located_child<'a>(&'a self, path: PathToChild) -> Result<ObjAtPath<'a,Child,PathToChild>,()>
-        { Ok(ObjAtPath::from_inner(self.get_child(&path)?,path)) }
-    fn get_located_child_owned(&self, path: PathToChild) -> Result<OwnedObjAtPath<Child,PathToChild>,()> where Child: Clone
-        { Ok(OwnedObjAtPath::from_inner(self.get_child_owned(&path)?,path)) }
-    
     fn get_children<'a>(&'a self) -> impl IntoIterator<Item = &'a Child> where Child: 'a {
         self.valid_primitive_paths()
             .into_iter()
             .map(|path| self.get_child(&path).expect(INVALID_PRIMITIVE_PATH_MESSAGE))
     }
+
+    fn get_child_owned(&self, path: &PathToChild) -> Result<Child,()> where Child: Clone;
     fn get_children_owned(&self) -> impl IntoIterator<Item = Child> where Child: Clone {
         self.valid_primitive_paths()
             .into_iter()
             .map(|path| self.get_child_owned(&path).expect(INVALID_PRIMITIVE_PATH_MESSAGE))
     }
 
+    fn get_located_child<'a>(&'a self, path: PathToChild) -> Result<ObjAtPath<'a,Child,PathToChild>,()>
+        { Ok(ObjAtPath::from_inner(self.get_child(&path)?,path)) }
     fn get_located_children<'a>(&'a self) -> impl IntoIterator<Item = ObjAtPath<'a,Child,PathToChild>> where Child: 'a {
         self.valid_primitive_paths()
             .into_iter()
             .map(|path| { self.get_located_child(path).expect(INVALID_PRIMITIVE_PATH_MESSAGE)})
     }
-    fn into_located_children_owned(self) -> impl IntoIterator<Item = OwnedObjAtPath<Child,PathToChild>> where Child: Clone, Self: Sized;
+    
+    fn get_located_child_owned(&self, path: PathToChild) -> Result<OwnedObjAtPath<Child,PathToChild>,()> where Child: Clone
+        { Ok(OwnedObjAtPath::from_inner(self.get_child_owned(&path)?,path)) }
     fn get_located_children_owned(&self) -> impl IntoIterator<Item = OwnedObjAtPath<Child,PathToChild>> where Child: Clone {
         self.valid_primitive_paths()
             .into_iter()
             .map(|path| { self.get_located_child_owned(path).expect(INVALID_PRIMITIVE_PATH_MESSAGE)})
     }
+    fn into_located_children_owned(self) -> impl IntoIterator<Item = OwnedObjAtPath<Child,PathToChild>> where Child: Clone, Self: Sized;
 }
 
 // Define HasDescendants

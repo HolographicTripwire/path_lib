@@ -216,7 +216,7 @@ pub fn generate_obj_at_path_wrappers(input: proc_macro::TokenStream) -> proc_mac
     let expanded = quote! {
         // Unowned
         #unowned_derives
-        pub struct #unowned_struct <#lt, #generic_bounds> (#obj_at_path<'a, #obj_type, #path_type>);
+        pub struct #unowned_struct <#lt, #generic_bounds> (#obj_at_path<#lt, #obj_type, #path_type>);
         // Implement base
         impl <#lt, #generic_bounds> #unowned_struct<#lt, #generics> {
             pub fn from_inner(obj_at: &#lt #obj_type, path: #path_type) -> Self
@@ -228,15 +228,73 @@ pub fn generate_obj_at_path_wrappers(input: proc_macro::TokenStream) -> proc_mac
             pub fn path(&#lt self) -> &#lt #path_type { self.0.path() } 
 
             pub fn into_obj_and_path(self) -> (&#lt #obj_type, #path_type) { self.0.into_obj_and_path() }
-            pub fn into_located_children<Child,PathToAppend>(self) -> impl IntoIterator<Item = #obj_at_path<'a,Child,#path_pair<#path_type,PathToAppend>>>
+            pub fn into_located_children<Child,PathToAppend>(self) -> impl IntoIterator<Item = #obj_at_path<#lt,Child,#path_pair<#path_type,PathToAppend>>>
             where #obj_type: #has_children<PathToAppend,Child>, PathToAppend: #path_primitive, Child: #lt {
                 self.0.into_located_children()
             }
             pub fn into_owned(self) -> #owned_struct<#generics> { #owned_struct(self.0.into_owned()) }
 
-            
-            pub fn replace_path<NewPath: #path>(self, function: impl Fn(#path_type) -> NewPath) -> #obj_at_path<'a,#obj_type,NewPath>
+            pub fn replace_path<NewPath: #path>(self, function: impl Fn(#path_type) -> NewPath) -> #obj_at_path<#lt,#obj_type,NewPath>
                 { self.0.replace_path(function) }
+        }
+        // Implement Appendable
+        impl <#lt, #generic_bounds> #unowned_struct<#lt, #generics> {
+            pub fn append<PathToAppend:#path,J,NewObj>(&self, subpath: PathToAppend) -> Result<#obj_at_path<#lt,NewObj,#path_pair<#path_type,PathToAppend>>,()> where #obj_type: #has_descendants<#lt,PathToAppend,J,NewObj>
+                { self.0.append(subpath) }
+            pub fn append_owned<PathToAppend:#path,J:Clone,NewObj:Clone>(&self, subpath: PathToAppend) -> Result<#owned_obj_at_path<NewObj,#path_pair<#path_type,PathToAppend>>,()> where #obj_type: #has_descendants<#lt,PathToAppend,J,NewObj>
+                { self.0.append_owned(subpath) }
+        }
+        // Implement HasChildren
+        impl <#lt, #generic_bounds> #unowned_struct<#lt, #generics> {
+            pub fn valid_primitive_paths<Joiner:#path_primitive,Child>(&self) -> impl IntoIterator<Item = Joiner> where #obj_type: #has_children<Joiner,Child>  
+                { self.0.valid_primitive_paths() }
+            
+            pub fn get_child<Joiner:#path_primitive,Child>(&self, path: &Joiner) -> Result<&Child,()> where #obj_type: #has_children<Joiner,Child>
+                { self.0.get_child(path) }
+            pub fn get_children<Joiner:#path_primitive,Child:#lt>(&self) -> impl IntoIterator<Item = &Child> where #obj_type: #has_children<Joiner,Child>
+                { self.0.get_children() }
+            
+            pub fn get_child_owned<Joiner:#path_primitive,Child:Clone>(&self, path: &Joiner) -> Result<Child,()> where #obj_type: #has_children<Joiner,Child>
+                { self.0.get_child_owned(path) }
+            pub fn get_children_owned<Joiner:#path_primitive,Child:Clone>(&self) -> impl IntoIterator<Item = Child> where #obj_type: #has_children<Joiner,Child>
+                { self.0.get_children_owned() }
+
+            pub fn get_located_child<Joiner:#path_primitive,Child>(&#lt self, path: Joiner) -> Result<#obj_at_path<#lt,Child,#path_pair<#path_type,Joiner>>,()> where #obj_type: #has_children<Joiner,Child>
+                { self.0.get_located_child(path) }
+            pub fn get_located_children<Joiner:#path_primitive,Child:#lt>(&#lt self) -> impl IntoIterator<Item = #obj_at_path<#lt,Child,#path_pair<#path_type,Joiner>>> where #obj_type: #has_children<Joiner,Child>
+                { self.0.get_located_children() }
+
+            pub fn get_located_child_owned<Joiner:#path_primitive,Child:Clone>(&self, path: Joiner) -> Result<#owned_obj_at_path<Child,#path_pair<#path_type,Joiner>>,()> where #obj_type: #has_children<Joiner,Child>
+                { self.0.get_located_child_owned(path) }
+            pub fn get_located_children_owned<Joiner:#path_primitive,Child:Clone>(&#lt self) -> impl IntoIterator<Item = #owned_obj_at_path<Child,#path_pair<#path_type,Joiner>>> where #obj_type: #has_children<Joiner,Child>
+                { self.0.get_located_children_owned() }
+            pub fn into_located_children_owned<Joiner:#path_primitive,Child:Clone>(self) -> impl IntoIterator<Item = #owned_obj_at_path<Child,#path_pair<#path_type,Joiner>>> where #obj_type: #has_children<Joiner,Child> + Clone /*, AtPath:#lt */
+                { self.0.into_located_children_owned() }
+        }
+        // Implement HasDescendants
+        impl <#lt,#generic_bounds> #unowned_struct<#lt,#generics> {
+            pub fn valid_paths<Joiner:#path,Descendant,J>(&#lt self) -> impl IntoIterator<Item = Joiner> where #obj_type: #has_descendants<#lt,Joiner,J,Descendant>
+                { self.0.valid_paths() }
+            
+            pub fn get_descendant<Joiner:#path,Descendant,J>(&#lt self, path: &Joiner) -> Result<&#lt Descendant,()> where #obj_type: #has_descendants<#lt,Joiner,J,Descendant>
+                { self.0.get_descendant(path) }
+            pub fn get_descendants<Joiner:#path,Descendant:#lt,J>(&#lt self) -> impl IntoIterator<Item = &#lt Descendant> where #obj_type: #has_descendants<#lt,Joiner,J,Descendant>
+                { self.0.get_descendants() }
+
+            pub fn get_descendant_owned<Joiner:#path,Descendant:Clone,J:Clone>(&#lt self, path: &Joiner) -> Result<Descendant,()> where #obj_type: #has_descendants<#lt,Joiner,J,Descendant>
+                { self.0.get_descendant_owned(path) }
+            pub fn get_descendants_owned<Joiner:#path,Descendant:Clone,J:Clone>(&#lt self) -> impl IntoIterator<Item = Descendant> where #obj_type: #has_descendants<#lt,Joiner,J,Descendant>
+                { self.0.get_descendants_owned() }
+
+            pub fn get_located_descendant<Joiner:#path,Descendant,J>(&#lt self, path: Joiner) -> Result<#obj_at_path<#lt,Descendant,#path_pair<#path_type,Joiner>>,()> where #obj_type: #has_descendants<#lt,Joiner,J,Descendant>
+                { self.0.get_located_descendant(path) }
+            pub fn get_located_descendants<Joiner:#path,Descendant:#lt,J>(&#lt self) -> impl IntoIterator<Item = #obj_at_path<#lt,Descendant,#path_pair<#path_type,Joiner>>> where #obj_type: #has_descendants<#lt,Joiner,J,Descendant>
+                { self.0.get_located_descendants() }
+
+            pub fn get_located_descendant_owned<Joiner:#path,Descendant:Clone,J:Clone>(&#lt self, path: Joiner) -> Result<#owned_obj_at_path<Descendant,#path_pair<#path_type,Joiner>>,()> where #obj_type: #has_descendants<#lt,Joiner,J,Descendant>
+                { self.0.get_located_descendant_owned(path) }
+            pub fn get_located_descendants_owned<Joiner:#path,Descendant:Clone,J:Clone>(&#lt self) -> impl IntoIterator<Item = #owned_obj_at_path<Descendant,#path_pair<#path_type,Joiner>>> where #obj_type: #has_descendants<#lt,Joiner,J,Descendant>
+                { self.0.get_located_descendants_owned() }
         }
         // Implement From<ObjAtPath>
         impl <#lt, #generic_bounds> From<#obj_at_path<#lt,#obj_type,#path_type>> for #unowned_struct<#lt,#generics> {
@@ -259,6 +317,58 @@ pub fn generate_obj_at_path_wrappers(input: proc_macro::TokenStream) -> proc_mac
 
             pub fn replace_path<NewPath: #path>(self, function: impl Fn(#path_type) -> NewPath) -> #owned_obj_at_path<#obj_type,NewPath>
                 { self.0.replace_path(function) }
+        }
+        // Implement HasChildren
+        impl <#generic_bounds> #owned_struct<#generics> {
+            pub fn valid_primitive_paths<Joiner:#path_primitive,Child>(&self) -> impl IntoIterator<Item = Joiner> where #obj_type: #has_children<Joiner,Child>  
+                { self.0.valid_primitive_paths() }
+            
+            pub fn get_child<Joiner:#path_primitive,Child>(&self, path: &Joiner) -> Result<&Child,()> where #obj_type: #has_children<Joiner,Child>
+                { self.0.get_child(path) }
+            pub fn get_children<#lt,Joiner:#path_primitive,Child:#lt>(&#lt self) -> impl IntoIterator<Item = &#lt Child> where #obj_type: #has_children<Joiner,Child>
+                { self.0.get_children() }
+            
+            pub fn get_child_owned<Joiner:#path_primitive,Child:Clone>(&self, path: &Joiner) -> Result<Child,()> where #obj_type: #has_children<Joiner,Child>
+                { self.0.get_child_owned(path) }
+            pub fn get_children_owned<Joiner:#path_primitive,Child:Clone>(&self) -> impl IntoIterator<Item = Child> where #obj_type: #has_children<Joiner,Child>
+                { self.0.get_children_owned() }
+
+            pub fn get_located_child<#lt,Joiner:#path_primitive,Child>(&#lt self, path: Joiner) -> Result<#obj_at_path<#lt,Child,#path_pair<#path_type,Joiner>>,()> where #obj_type: #has_children<Joiner,Child>
+                { self.0.get_located_child(path) }
+            pub fn get_located_children<#lt,Joiner:#path_primitive,Child:#lt>(&#lt self) -> impl IntoIterator<Item = #obj_at_path<#lt,Child,#path_pair<#path_type,Joiner>>> where #obj_type: #has_children<Joiner,Child>
+                { self.0.get_located_children() }
+
+            pub fn get_located_child_owned<Joiner:#path_primitive,Child:Clone>(&self, path: Joiner) -> Result<#owned_obj_at_path<Child,#path_pair<#path_type,Joiner>>,()> where #obj_type: #has_children<Joiner,Child>
+                { self.0.get_located_child_owned(path) }
+            pub fn get_located_children_owned<#lt,Joiner:#path_primitive,Child:Clone>(&#lt self) -> impl IntoIterator<Item = #owned_obj_at_path<Child,#path_pair<#path_type,Joiner>>> where #obj_type: #has_children<Joiner,Child>
+                { self.0.get_located_children_owned() }
+            pub fn into_located_children_owned<Joiner:#path_primitive,Child:Clone>(self) -> impl IntoIterator<Item = #owned_obj_at_path<Child,#path_pair<#path_type,Joiner>>> where #obj_type: #has_children<Joiner,Child> + Clone /*, AtPath:#lt */
+                { self.0.into_located_children_owned() }
+        }
+        // Implement HasDescendants
+        impl <#generic_bounds> #owned_struct<#generics> {
+            pub fn valid_paths<#lt,Joiner:#path,Descendant,J>(&#lt self) -> impl IntoIterator<Item = Joiner> where #obj_type: #has_descendants<#lt,Joiner,J,Descendant>
+                { self.0.valid_paths() }
+            
+            pub fn get_descendant<#lt,Joiner:#path,Descendant,J>(&#lt self, path: &Joiner) -> Result<&#lt Descendant,()> where #obj_type: #has_descendants<#lt,Joiner,J,Descendant>
+                { self.0.get_descendant(path) }
+            pub fn get_descendants<#lt,Joiner:#path,Descendant:#lt,J>(&#lt self) -> impl IntoIterator<Item = &#lt Descendant> where #obj_type: #has_descendants<#lt,Joiner,J,Descendant>
+                { self.0.get_descendants() }
+
+            pub fn get_descendant_owned<#lt,Joiner:#path,Descendant:Clone,J:Clone>(&#lt self, path: &Joiner) -> Result<Descendant,()> where #obj_type: #has_descendants<#lt,Joiner,J,Descendant>
+                { self.0.get_descendant_owned(path) }
+            pub fn get_descendants_owned<#lt,Joiner:#path,Descendant:Clone,J:Clone>(&#lt self) -> impl IntoIterator<Item = Descendant> where #obj_type: #has_descendants<#lt,Joiner,J,Descendant>
+                { self.0.get_descendants_owned() }
+
+            pub fn get_located_descendant<#lt,Joiner:#path,Descendant,J>(&#lt self, path: Joiner) -> Result<#obj_at_path<#lt,Descendant,#path_pair<#path_type,Joiner>>,()> where #obj_type: #has_descendants<#lt,Joiner,J,Descendant>
+                { self.0.get_located_descendant(path) }
+            pub fn get_located_descendants<#lt,Joiner:#path,Descendant:#lt,J>(&#lt self) -> impl IntoIterator<Item = #obj_at_path<#lt,Descendant,#path_pair<#path_type,Joiner>>> where #obj_type: #has_descendants<#lt,Joiner,J,Descendant>
+                { self.0.get_located_descendants() }
+
+            pub fn get_located_descendant_owned<#lt,Joiner:#path,Descendant:Clone,J:Clone>(&#lt self, path: Joiner) -> Result<#owned_obj_at_path<Descendant,#path_pair<#path_type,Joiner>>,()> where #obj_type: #has_descendants<#lt,Joiner,J,Descendant>
+                { self.0.get_located_descendant_owned(path) }
+            pub fn get_located_descendants_owned<#lt,Joiner:#path,Descendant:Clone,J:Clone>(&#lt self) -> impl IntoIterator<Item = #owned_obj_at_path<Descendant,#path_pair<#path_type,Joiner>>> where #obj_type: #has_descendants<#lt,Joiner,J,Descendant>
+                { self.0.get_located_descendants_owned() }
         }
         // Implement From<OwnedObjAtPath>
         impl <#generic_bounds> From<#owned_obj_at_path<#obj_type,#path_type>> for #owned_struct<#generics> {

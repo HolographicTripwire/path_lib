@@ -1,139 +1,17 @@
-use std::fmt::Display;
+mod utils;
 
-use proc_macro2::{Span, TokenStream, TokenTree};
+use proc_macro2::Span;
 use quote::quote;
 use syn::parse::{Parse, ParseStream};
 use syn::token::Paren;
 use syn::{parse_macro_input, Token};
 use syn::{
-    Error, Ident, Lifetime, LitStr, Path, PredicateLifetime, PredicateType, Result as SynResult, Type, WhereClause, WherePredicate, parenthesized
+    Error, Ident, LitStr, {Result as SynResult}, Type, parenthesized
 };
-use proc_macro_crate::{crate_name, FoundCrate};
 
-fn import(crate_id: &str, import_id: &str) -> TokenStream {
-    let found_crate = crate_name(crate_id).expect(&format!("{} is present in `Cargo.toml`", crate_id));
-    let import = syn::parse_str::<syn::Path>(&import_id).expect(&format!("Failed to convert '{}' to a path", import_id));
-    //let import = Ident::new(&import_id, Span::call_site());
-
-    match found_crate {
-        FoundCrate::Itself => quote!( crate::#import ),
-        FoundCrate::Name(name) => {
-            let ident = Ident::new(&name, Span::call_site());
-            quote!( #ident::#import )
-        }
-    }
-}
-
-#[derive(Debug)]
-struct  TypeWithBounds {
-    bounded_ty: Type,
-    where_clause: Option<WhereClause>
-}
-
-impl TypeWithBounds {
-    fn pred_lifetimes(&self) -> Vec<PredicateLifetime> {
-        match &self.where_clause {
-            Some(where_clause) => where_clause.predicates
-                .clone()
-                .into_iter()
-                .filter_map(|predicate| match predicate {
-                    WherePredicate::Lifetime(predicate_lifetime) => Some(predicate_lifetime),
-                    _ => None,
-                })
-                .collect(),
-            None => vec![]
-        }
-    }
-    fn pred_types(&self) -> Vec<PredicateType> {
-        match &self.where_clause {
-            Some(where_clause) => where_clause.predicates
-                .clone()
-                .into_iter()
-                .filter_map(|predicate| match predicate {
-                    WherePredicate::Type(predicate_type) => Some(predicate_type),
-                    _ => None,
-                })
-                .collect(),
-            None => vec![]
-        }
-    }
-
-    fn generics(&self) -> TokenStream {
-        let lifetimes: Vec<Lifetime> = self.pred_lifetimes()
-            .into_iter()
-            .map(|lifetime| lifetime.lifetime)
-            .collect();
-        let lifetimes_punctuated = quote!{#(#lifetimes),*};
-
-        let types: Vec<Type> = self
-            .pred_types()
-            .into_iter()
-            .map(|pred_type| pred_type.bounded_ty )
-            .collect();
-        let types_punctuated = quote!{#(#types),*};
-        if lifetimes.len() > 0 && types.len() > 0 {
-            quote!{#lifetimes_punctuated,#types_punctuated}
-        } else {
-            quote!{#lifetimes_punctuated #types_punctuated}
-        }
-    }
-
-    fn generic_bounds(&self) -> TokenStream {
-        match &self.where_clause {
-            Some(where_clause) => {
-                let predicates = &where_clause.predicates;
-                quote! { #predicates }
-            }, None => quote! {},
-        }
-    }
-}
-
-impl Parse for TypeWithBounds {
-    fn parse(input: ParseStream) -> SynResult<Self> {
-        let obj_type = input.parse()?;
-        let where_clause = {
-            if input.lookahead1().peek(Token![where]) { Some(input.parse()?) }
-            else { None }
-        };
-        return Ok(Self { bounded_ty: obj_type, where_clause });
-    }
-}
-impl Display for TypeWithBounds {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let obj_type = self.bounded_ty.clone();
-        let where_clause = self.where_clause.clone();
-        write!(f, "{}", quote!{#obj_type #where_clause})
-    }
-}
-
-struct PathListInner {
-    paths: Vec<Path>
-}
-
-impl Parse for PathListInner {
-    fn parse(input: ParseStream) -> SynResult<Self> {
-        let mut paths = Vec::new();
-        loop {
-            paths.push(input.parse()?);
-            if input.is_empty() { break; }
-            let _: Token![,] = input.parse()?;
-        }
-        Ok(PathListInner{ paths })
-    }
-}
-
-struct PathList {
-    paths: Vec<Path>
-}
-impl Parse for PathList {
-    fn parse(input: ParseStream) -> SynResult<Self> {
-        let Some(TokenTree::Group(tree)) = input.parse()? else { return SynResult::Err(syn::Error::new(Span::call_site(), "Parameter must be enclosed in brackets") ) };
-        if tree.delimiter() != proc_macro2::Delimiter::Bracket { return SynResult::Err(syn::Error::new(Span::call_site(), "Parameter must be enclosed in brackets")) };
-        let inner_toks = tree.stream().into();
-        let inner: PathListInner = syn::parse2(inner_toks)?;
-        Ok(PathList { paths: inner.paths })
-    }
-}
+use crate::utils::imports::import;
+use crate::utils::types::path_list::PathList;
+use crate::utils::types::type_with_bounds::TypeWithBounds;
 
 struct MacroInput {
     _obj_type_paren: Paren,

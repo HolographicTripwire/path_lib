@@ -1,10 +1,10 @@
 mod utils;
 
-use proc_macro2::Span;
+use proc_macro2::{Span,TokenStream};
 use quote::quote;
 use syn::parse::{Parse, ParseStream};
 use syn::token::Paren;
-use syn::{parse_macro_input, Token};
+use syn::{Token, parse_macro_input};
 use syn::{
     Error, Ident, LitStr, {Result as SynResult}, Type, parenthesized
 };
@@ -61,6 +61,34 @@ impl Parse for MacroInput {
     }
 }
 
+struct PathlibImports {
+    path: TokenStream,
+    path_primitive: TokenStream,
+    path_pair: TokenStream,
+    
+    obj_at_path: TokenStream,
+    owned_obj_at_path: TokenStream,
+    
+    has_children: TokenStream,
+    has_descendants: TokenStream,
+}
+impl Default for PathlibImports {
+    fn default() -> Self {
+        let crate_id = "path_lib";
+        Self {
+            path: import(crate_id, "paths::Path"),
+            path_primitive: import(crate_id, "paths::PathPrimitive"),
+            path_pair: import(crate_id, "paths::PathPair"),
+            
+            obj_at_path: import(crate_id, "obj_at_path::ObjAtPath"),
+            owned_obj_at_path: import(crate_id, "obj_at_path::OwnedObjAtPath"),
+            
+            has_children: import(crate_id, "HasChildren"),
+            has_descendants: import(crate_id, "HasDescendants"),
+        }
+    }
+}
+
 #[proc_macro]
 pub fn generate_obj_at_path_wrappers(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let input = parse_macro_input!(input as MacroInput);
@@ -81,14 +109,14 @@ pub fn generate_obj_at_path_wrappers(input: proc_macro::TokenStream) -> proc_mac
     let owned_paths = input.owned_derives.paths;
     let owned_derives = quote! { #[derive(#(#owned_paths),*)] };
     // Imports from path_lib
-    let crate_id = "path_lib";
-    let path = import(crate_id, "paths::Path");
-    let path_primitive = import(crate_id, "paths::PathPrimitive");
-    let path_pair = import(crate_id, "paths::PathPair");
-    let obj_at_path = import(crate_id, "obj_at_path::ObjAtPath");
-    let owned_obj_at_path = import(crate_id, "obj_at_path::OwnedObjAtPath");
-    let has_children = import(crate_id, "HasChildren");
-    let has_descendants = import(crate_id, "HasDescendants");
+    let imports = PathlibImports::default();
+    let path = imports.path;
+    let path_primitive = imports.path_primitive;
+    let path_pair = imports.path_pair;
+    let obj_at_path = imports.obj_at_path;
+    let owned_obj_at_path = imports.owned_obj_at_path;
+    let has_children = imports.has_children;
+    let has_descendants = imports.has_descendants;
 
     // Build final tokens:
     let expanded = quote! {
@@ -106,10 +134,6 @@ pub fn generate_obj_at_path_wrappers(input: proc_macro::TokenStream) -> proc_mac
             pub fn path(&#lt self) -> &#lt #path_type { self.0.path() } 
 
             pub fn into_obj_and_path(self) -> (&#lt #obj_type, #path_type) { self.0.into_obj_and_path() }
-            pub fn into_located_children<Child,PathToAppend>(self) -> impl IntoIterator<Item = #obj_at_path<#lt,Child,#path_pair<#path_type,PathToAppend>>>
-            where #obj_type: #has_children<PathToAppend,Child>, PathToAppend: #path_primitive, Child: #lt {
-                self.0.into_located_children()
-            }
             pub fn into_owned(self) -> #owned_struct<#generics> { #owned_struct(self.0.into_owned()) }
 
             pub fn replace_path<NewPath: #path>(self, function: impl Fn(#path_type) -> NewPath) -> #obj_at_path<#lt,#obj_type,NewPath>
@@ -141,6 +165,9 @@ pub fn generate_obj_at_path_wrappers(input: proc_macro::TokenStream) -> proc_mac
                 { self.0.get_located_child(path) }
             pub fn get_located_children<Joiner:#path_primitive,Child:#lt>(&#lt self) -> impl IntoIterator<Item = #obj_at_path<#lt,Child,#path_pair<#path_type,Joiner>>> where #obj_type: #has_children<Joiner,Child>
                 { self.0.get_located_children() }
+            pub fn into_located_children<Child,PathToAppend>(self) -> impl IntoIterator<Item = #obj_at_path<#lt,Child,#path_pair<#path_type,PathToAppend>>>
+            where #obj_type: #has_children<PathToAppend,Child>, PathToAppend: #path_primitive, Child: #lt
+                { self.0.into_located_children() }
 
             pub fn get_located_child_owned<Joiner:#path_primitive,Child:Clone>(&self, path: Joiner) -> Result<#owned_obj_at_path<Child,#path_pair<#path_type,Joiner>>,()> where #obj_type: #has_children<Joiner,Child>
                 { self.0.get_located_child_owned(path) }

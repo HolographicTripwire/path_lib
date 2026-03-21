@@ -1,8 +1,11 @@
 mod utils;
+mod inputs;
+mod outputs;
 mod macros;
 
 use crate::utils::imports::import;
 use proc_macro2::TokenStream;
+use syn::{Error, Result as SynResult};
 
 struct PathlibImports {
     path: TokenStream,
@@ -31,7 +34,14 @@ impl Default for PathlibImports {
         }
     }
 }
+fn transform_syn_err<T, F: FnOnce(String) -> String>(r: SynResult<T>, f: F) -> SynResult<T> {
+    r.map_err(|e| Error::new(e.span(), f(e.to_string())))
+}
+
 
 #[proc_macro]
 pub fn generate_obj_at_path_wrappers(input: proc_macro::TokenStream) -> proc_macro::TokenStream
     { macros::generate_obj_at_path_wrappers(input) }
+#[proc_macro]
+pub fn generate_child_at_path(input: proc_macro::TokenStream) -> proc_macro::TokenStream
+    { macros::generate_child_in_path(input) }

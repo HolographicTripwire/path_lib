@@ -50,7 +50,7 @@ PathToDescendant:Path {
     fn get_descendant(&'a self, path: &PathToDescendant) -> Result<&'a Descendant,()>;
     fn get_descendant_owned(&self, path: &PathToDescendant) -> Result<Descendant,()> where _Joiner: Clone, Descendant: Clone;
     
-    fn get_located_descendant(&'a self, path: PathToDescendant) -> Result<ObjAtPath<'a,Descendant,PathToDescendant>,()>
+    fn get_located_descendant(&'a self, path: Path,PathToDescendant) -> Result<ObjAtPath<'a,Descendant,PathToDescendant>,()>
         { Ok(ObjAtPath::from_inner(self.get_descendant(&path)?, path)) }
     fn get_located_descendant_owned(&self, path: PathToDescendant) -> Result<OwnedObjAtPath<Descendant,PathToDescendant>,()> where _Joiner: Clone, Descendant: Clone
         { Ok(OwnedObjAtPath::from_inner(self.get_descendant_owned(&path)?, path)) }

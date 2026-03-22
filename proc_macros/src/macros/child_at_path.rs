@@ -1,7 +1,7 @@
 use proc_macro::TokenStream;
 use syn::parse::{Parse, ParseStream};
 use syn::token::{Comma, Paren};
-use syn::{Result as SynResult, parse_macro_input};
+use syn::{Result as SynResult, TypePath, parse_macro_input};
 use syn::{Ident, Type, parenthesized};
 
 use quote::quote;
@@ -21,7 +21,7 @@ struct MacroInput {
     // plural_term: LitStr,
     // _plural_term_comma: Comma,
 
-    path_type: Type,
+    path_type: TypePath,
     _path_type_comma: Comma,
 
     unowned_struct_name: Ident,
@@ -138,12 +138,12 @@ impl Parse for MacroInput {
 pub fn generate_child_in_path(input: proc_macro::TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as MacroInput);
     let child_at_path_toks = child_at_path_toks(
-        input.bounded_child_type,
-        input.path_type,
-        input.unowned_struct_name,
-        input.unowned_struct_derives,
-        input.owned_struct_name,
-        input.owned_struct_derives,
+        &input.bounded_child_type,
+        &input.path_type,
+        &input.unowned_struct_name,
+        &input.unowned_struct_derives,
+        &input.owned_struct_name,
+        &input.owned_struct_derives,
     );
     let expanded = proc_macro::TokenStream::from(quote!{
         #child_at_path_toks

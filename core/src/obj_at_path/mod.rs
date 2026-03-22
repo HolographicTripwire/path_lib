@@ -1,66 +1,92 @@
-mod appendable;
-mod children;
-mod descendants;
+// mod appendable;
+// mod children;
+// mod descendants;
 
-use crate::{HasChildren, has_descendants::HasDescendants, paths::{Path, PathPair, PathPrimitive}};
-
-#[derive(Clone,PartialEq,Eq,Debug)]
-pub struct ObjAtPath<'a, Obj, AtPath:Path> {
-    obj: &'a Obj,
-    path: AtPath,
-}
-impl <'a, Obj, AtPath:Path> ObjAtPath<'a,Obj,AtPath> {
-    pub fn from_inner(obj_at: &'a Obj, path: AtPath) -> Self { Self { obj: obj_at, path }}
-    pub fn from_outer<Joiner,O: HasDescendants<'a,AtPath,Joiner,Obj>>(obj_in: &'a O, path: AtPath) -> Result<Self,()> {
-        Ok(Self::from_inner(obj_in.get_descendant(&path)?,path))
-    }
-
-    pub fn obj(&'a self) -> &'a Obj { &self.obj }
-    pub fn path(&'a self) -> &'a AtPath { &self.path } 
-    pub fn into_obj_and_path(self) -> (&'a Obj, AtPath) { (self.obj, self.path) }
-    pub fn into_located_children<Child,PathToAppend>(self) -> impl IntoIterator<Item = ObjAtPath<'a,Child,PathPair<AtPath,PathToAppend>>> where Obj: HasChildren<PathToAppend,Child>, PathToAppend: PathPrimitive, Child: 'a {
-        let (obj, old_path) = self.into_obj_and_path();
-        obj.valid_primitive_paths().into_iter()
-            .map(move |path| ObjAtPath::from_inner(obj.get_child(&path).expect("msg"), old_path.clone().pair_append(path)))
-    }
-    pub fn into_owned(self) -> OwnedObjAtPath<Obj,AtPath> where Obj: Clone
-        { OwnedObjAtPath::from_inner(self.obj.to_owned(), self.path) } 
-    
-    pub fn prepend<PathToPrepend: Path>(&'a self, subpath: PathToPrepend) -> ObjAtPath<'a,Obj,PathPair<PathToPrepend,AtPath>> {
-        let obj = self.obj();
-        let path = self.path().clone().pair_prepend(subpath);
-        ObjAtPath::from_inner(obj,path)
-    }
-
-    pub fn replace_path<NewPath: Path>(self, function: impl Fn(AtPath) -> NewPath) -> ObjAtPath<'a,Obj,NewPath> {
-        ObjAtPath::from_inner(self.obj, (function)(self.path))
-    }
-}
-
+// use crate::{HasChildren, has_descendants::HasDescendants, paths::{Path, PathPair, PathPrimitive}};
 
 #[derive(Clone,PartialEq,Eq,Debug)]
-pub struct OwnedObjAtPath<Obj, AtPath:Path> {
-    obj: Obj,
-    path: AtPath,
+pub struct ObjAtPath<'a, Obj, AtPath> {
+    pub obj: &'a Obj,
+    pub path: AtPath,
 }
+impl <'a, Obj, AtPath> ObjAtPath<'a,Obj,AtPath> {
+    // pub fn from_inner(obj_at: &'a Obj, path: AtPath) -> Self { Self { obj: obj_at, path }}
+    // pub fn from_outer<Joiner,O: HasDescendants<'a,AtPath,Joiner,Obj>>(obj_in: &'a O, path: AtPath) -> Result<Self,()> {
+    //     Ok(Self::from_inner(obj_in.get_descendant(&path)?,path))
+    // }
 
-impl <'a, Obj: 'a + Clone, AtPath:Path> OwnedObjAtPath<Obj,AtPath> {
-    pub fn from_inner(obj_at: Obj, path: AtPath) -> Self
-        { Self { obj: obj_at, path }}
-    pub fn from_outer<Joiner,O: HasDescendants<'a, AtPath,Joiner,Obj>>(obj_in: &'a O, path: AtPath) -> Result<Self,()>
-        { Ok(ObjAtPath::from_outer(obj_in, path)?.into_owned()) }
-
-    pub fn obj(&'a self) -> &'a Obj { &self.obj }
-    pub fn path(&'a self) -> &'a AtPath { &self.path } 
-    pub fn into_obj_and_path(self) -> (Obj,AtPath) { (self.obj, self.path) }
+    // pub fn obj(&'a self) -> &'a Obj { &self.obj }
+    // pub fn path(&'a self) -> &'a AtPath { &self.path } 
+    // pub fn into_obj_and_path(self) -> (&'a Obj, AtPath) { (self.obj, self.path) }
+    // pub fn into_located_children<Child,PathToAppend>(self) -> impl IntoIterator<Item = ObjAtPath<'a,Child,PathPair<AtPath,PathToAppend>>> where Obj: HasChildren<PathToAppend,Child>, PathToAppend: PathPrimitive, Child: 'a {
+    //     let (obj, old_path) = self.into_obj_and_path();
+    //     obj.valid_primitive_paths().into_iter()
+    //         .map(move |path| ObjAtPath::from_inner(obj.get_child(&path).expect("msg"), old_path.clone().pair_append(path)))
+    // }
+    // pub fn into_owned(self) -> OwnedObjAtPath<Obj,AtPath> where Obj: Clone
+    //     { OwnedObjAtPath::from_inner(self.obj.to_owned(), self.path) } 
     
-    pub fn prepend<PathToPrepend: Path>(&'a self, subpath: PathToPrepend) -> OwnedObjAtPath<Obj,PathPair<PathToPrepend,AtPath>> {
-        let obj = self.obj();
-        let path = self.path().clone().pair_prepend(subpath);
-        OwnedObjAtPath::from_inner(obj.clone(),path)
-    }
+    // pub fn prepend<PathToPrepend: Path>(&'a self, subpath: PathToPrepend) -> ObjAtPath<'a,Obj,PathPair<PathToPrepend,AtPath>> {
+    //     let obj = self.obj();
+    //     let path = self.path().clone().pair_prepend(subpath);
+    //     ObjAtPath::from_inner(obj,path)
+    // }
+    pub fn append_path<ChildPath, JoinedPath: From<(AtPath,ChildPath)>>(&self, path: ChildPath) -> JoinedPath where AtPath: Clone
+        { (self.path.clone(),path).into() }
+    pub fn prepend_path<ParentPath, JoinedPath: From<(ParentPath,AtPath)>>(&self, path: ParentPath) -> JoinedPath where AtPath: Clone
+        { (path,self.path.clone()).into() }
+    pub fn append_path_to_self<ChildPath, JoinedPath: From<(AtPath,ChildPath)>>(self, path: ChildPath) -> ObjAtPath<'a, Obj, JoinedPath>
+        { ObjAtPath{obj: self.obj, path: (self.path,path).into()} }
+    pub fn prepend_path_to_self<ParentPath, JoinedPath: From<(ParentPath,AtPath)>>(self, path: ParentPath) -> ObjAtPath<'a, Obj, JoinedPath>
+        { ObjAtPath{obj: self.obj, path: (path,self.path).into()} }
 
-    pub fn replace_path<NewPath: Path>(self, function: impl Fn(AtPath) -> NewPath) -> OwnedObjAtPath<Obj,NewPath> {
-        OwnedObjAtPath::from_inner(self.obj, (function)(self.path))
-    }
+    pub fn replace_path<NewPath>(self, function: impl Fn(AtPath) -> NewPath) -> ObjAtPath<'a,Obj,NewPath>
+        { ObjAtPath{obj: self.obj, path: (function)(self.path)} }
+    
 }
+
+
+#[derive(Clone,PartialEq,Eq,Debug)]
+pub struct OwnedObjAtPath<Obj, AtPath> {
+    pub obj: Obj,
+    pub path: AtPath,
+}
+
+impl <'a, Obj: 'a + Clone, AtPath> OwnedObjAtPath<Obj,AtPath> {
+//     pub fn from_inner(obj_at: Obj, path: AtPath) -> Self
+//         { Self { obj: obj_at, path }}
+//     pub fn from_outer<Joiner,O: HasDescendants<'a, AtPath,Joiner,Obj>>(obj_in: &'a O, path: AtPath) -> Result<Self,()>
+//         { Ok(ObjAtPath::from_outer(obj_in, path)?.into_owned()) }
+
+//     pub fn obj(&'a self) -> &'a Obj { &self.obj }
+//     pub fn path(&'a self) -> &'a AtPath { &self.path } 
+//     pub fn into_obj_and_path(self) -> (Obj,AtPath) { (self.obj, self.path) }
+    
+//     pub fn prepend<PathToPrepend: Path>(&'a self, subpath: PathToPrepend) -> OwnedObjAtPath<Obj,PathPair<PathToPrepend,AtPath>> {
+//         let obj = self.obj();
+//         let path = self.path().clone().pair_prepend(subpath);
+//         OwnedObjAtPath::from_inner(obj.clone(),path)
+//     }
+    pub fn append_path<ChildPath, JoinedPath: From<(AtPath,ChildPath)>>(&self, path: ChildPath) -> JoinedPath where AtPath: Clone
+        { (self.path.clone(),path).into() }
+    pub fn prepend_path<ParentPath, JoinedPath: From<(ParentPath,AtPath)>>(&self, path: ParentPath) -> JoinedPath where AtPath: Clone
+        { (path,self.path.clone()).into() }
+    pub fn append_path_to_self<ChildPath, JoinedPath: From<(AtPath,ChildPath)>>(self, path: ChildPath) -> OwnedObjAtPath<Obj, JoinedPath> where AtPath: Clone
+        { OwnedObjAtPath{obj: self.obj, path: (self.path.clone(),path).into()} }
+    pub fn prepend_path_to_self<ParentPath, JoinedPath: From<(ParentPath,AtPath)>>(self, path: ParentPath) -> OwnedObjAtPath<Obj, JoinedPath> where AtPath: Clone
+        { OwnedObjAtPath{obj: self.obj, path: (path,self.path.clone()).into()} }
+
+    pub fn replace_path<NewPath>(self, function: impl Fn(AtPath) -> NewPath) -> OwnedObjAtPath<Obj,NewPath>
+        { OwnedObjAtPath{obj: self.obj, path: (function)(self.path)} }
+}
+
+// mod from {
+//     use crate::obj_at_path::ObjAtPath;
+
+//     impl <'a,Obj,OldPath: Into<NewPath>,NewPath> Into<ObjAtPath<'a,Obj,NewPath>> for ObjAtPath<'a,Obj,OldPath> {
+//         fn into(self) -> ObjAtPath<'a,Obj,NewPath> { ObjAtPath {
+//             obj: self.obj,
+//             path: self.path.into()
+//         } }
+//     }
+// }

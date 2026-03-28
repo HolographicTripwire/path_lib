@@ -40,8 +40,5 @@ fn transform_syn_err<T, F: FnOnce(String) -> String>(r: SynResult<T>, f: F) -> S
 
 
 #[proc_macro]
-pub fn generate_obj_at_path_wrappers(input: proc_macro::TokenStream) -> proc_macro::TokenStream
-    { macros::generate_obj_at_path_wrappers(input) }
-#[proc_macro]
 pub fn generate_parent_of_children_trait(input: proc_macro::TokenStream) -> proc_macro::TokenStream
     { macros::generate_parent_of_children_trait(input) }

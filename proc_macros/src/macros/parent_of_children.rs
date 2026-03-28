@@ -174,6 +174,7 @@ pub fn generate_parent_of_children_trait(input: proc_macro::TokenStream) -> Toke
         #located_parent_of_children_toks
         #owned_located_parent_of_children_toks
     });
+    //panic!("{}", input.bounded_child_type.nonself_generics_toks());
     //panic!("{}", TokenStream::from(expanded).to_string());
     expanded
 }

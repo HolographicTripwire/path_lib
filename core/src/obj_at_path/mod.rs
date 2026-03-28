@@ -45,7 +45,6 @@ impl <'a, Obj, AtPath> ObjAtPath<'a,Obj,AtPath> {
     
 }
 
-
 #[derive(Clone,PartialEq,Eq,Debug)]
 pub struct OwnedObjAtPath<Obj, AtPath> {
     pub obj: Obj,
@@ -80,13 +79,16 @@ impl <'a, Obj: 'a + Clone, AtPath> OwnedObjAtPath<Obj,AtPath> {
         { OwnedObjAtPath{obj: self.obj, path: (function)(self.path)} }
 }
 
-// mod from {
-//     use crate::obj_at_path::ObjAtPath;
+mod from {
+    use crate::obj_at_path::{ObjAtPath, OwnedObjAtPath};
 
-//     impl <'a,Obj,OldPath: Into<NewPath>,NewPath> Into<ObjAtPath<'a,Obj,NewPath>> for ObjAtPath<'a,Obj,OldPath> {
-//         fn into(self) -> ObjAtPath<'a,Obj,NewPath> { ObjAtPath {
-//             obj: self.obj,
-//             path: self.path.into()
-//         } }
-//     }
-// }
+    impl <'a,Obj:Clone,Path> From<ObjAtPath<'a,Obj,Path>> for OwnedObjAtPath<Obj,Path> {
+        fn from(value: ObjAtPath<'a,Obj,Path>) -> Self { Self {obj: value.obj.clone(), path: value.path} }
+    }
+    // impl <'a,Obj,OldPath: Into<NewPath>,NewPath> Into<ObjAtPath<'a,Obj,NewPath>> for ObjAtPath<'a,Obj,OldPath> {
+    //     fn into(self) -> ObjAtPath<'a,Obj,NewPath> { ObjAtPath {
+    //         obj: self.obj,
+    //         path: self.path.into()
+    //     } }
+    // }
+}
